@@ -57,3 +57,14 @@ Then open **`http://localhost:3456`** to:
 - View **High-Level Executive Recommendations** highlighted right at the top.
 - Filter bundles by Baseline status and inspect **1:1 Minified AST Match Snippets** with byte offsets.
 - Export reports as Markdown or JSON with one click.
+
+---
+
+## 🤖 Installing & Using the Agent Skill
+
+This package includes an agent skill at [`skill/SKILL.md`](./skill/SKILL.md) (and `.agents/skills/polyfill-analyzer/SKILL.md`).
+
+Once installed in an agent's context, you can prompt your agent naturally:
+> *"Please check `https://www.example.com` (or `./build/static/js/main.js`) for polyfills and tell me what I need to do."*
+
+The agent will automatically run the AST-grep scanner, evaluate the site's native syntax floor against its shipped polyfills, and present prioritized, actionable engineering recommendations at the top of its response.
