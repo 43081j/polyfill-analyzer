@@ -14,6 +14,7 @@ import {
   analyzeBundles,
 } from '../engine/index.js';
 import { loadCatalog } from '../catalog/index.js';
+import { startWebServer } from '../web/server.js';
 
 export const version = '0.1.0';
 
@@ -22,11 +23,13 @@ function printHelp(): void {
 Usage: polyfill-analyzer <file> [options]
   polyfill-analyzer <https://url> [options]       Scan a live website URL or remote JS bundle
   polyfill-analyzer url <https://url> [options]   Scan a live website URL (explicit subcommand)
+  polyfill-analyzer serve [--port 3000]           Start interactive Web UI dashboard & REST API
 
 Options:
   -f, --format <table|json|markdown>   Output format (default: table for file, markdown for URL)
   -j, --json                           Output raw JSON report
   -c, --catalog <path>                 Custom catalog rules JSON path
+  -p, --port <number>                  Port for 'serve' Web UI (default: 3000)
   -m, --max-bundles <number>           Maximum script bundles to scan on a website URL (default: 20)
   -h, --help                           Show this help message`);
 }
@@ -39,6 +42,7 @@ export function runCli(argv = process.argv.slice(2)): void {
         json: { type: 'boolean', short: 'j' },
         catalog: { type: 'string', short: 'c' },
         format: { type: 'string', short: 'f' },
+        port: { type: 'string', short: 'p' },
         'max-bundles': { type: 'string', short: 'm' },
         help: { type: 'boolean', short: 'h' },
       },
@@ -67,6 +71,13 @@ export function runCli(argv = process.argv.slice(2)): void {
     }
 
     const firstPos = positionals[0];
+
+    // 1. Subcommand: serve / web
+    if (firstPos === 'serve' || firstPos === 'web') {
+      const port = values.port ? parseInt(values.port, 10) : 3000;
+      startWebServer(port);
+      return;
+    }
 
     // 2. Subcommand: url <https://...> OR direct http(s):// URL
     if (firstPos === 'url' || firstPos.startsWith('http://') || firstPos.startsWith('https://')) {

@@ -44,3 +44,16 @@ npx polyfill-analyzer ./dist/bundle.min.js --format markdown
 # JSON output (includes 1:1 SourceMap mapping if .map file is present)
 npx polyfill-analyzer ./dist/bundle.min.js --json
 ```
+
+### 3. Launch the Interactive Web UI Dashboard
+Start the self-contained Web UI and REST API server:
+```bash
+npx polyfill-analyzer serve --port 3456
+# Or via npm script:
+npm run web
+```
+Then open **`http://localhost:3456`** to:
+- Enter any website URL to analyze its production bundles live.
+- View **High-Level Executive Recommendations** highlighted right at the top.
+- Filter bundles by Baseline status and inspect **1:1 Minified AST Match Snippets** with byte offsets.
+- Export reports as Markdown or JSON with one click.
