@@ -1,0 +1,10 @@
+id: nullish-coalescing
+message: Detected transpilation helper for Nullish Coalescing (??)
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("@babel/runtime/helpers/nullishCoalescing")
+    - pattern: import "@babel/runtime/helpers/nullishCoalescing"
+    - pattern: require("@babel/runtime/helpers/interopRequireDefault")(require("@babel/runtime/helpers/nullishCoalescing"))
+    - pattern: function _nullishCoalescing($_, $_) { $$$ }

@@ -1,0 +1,15 @@
+id: array-iterator
+message: Detected polyfill for Array.prototype[Symbol.iterator]
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("core-js/modules/es.array.iterator.js")
+    - pattern: require("core-js/modules/es.array.iterator")
+    - pattern: __require("core-js/modules/es.array.iterator.js")
+    - pattern: __require("core-js/modules/es.array.iterator")
+    - pattern: $_("core-js/modules/es.array.iterator.js")
+    - pattern: $_("core-js/modules/es.array.iterator")
+    - pattern: import "core-js/modules/es.array.iterator.js"
+    - pattern: import "core-js/modules/es.array.iterator"
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { values: $IMPL })'

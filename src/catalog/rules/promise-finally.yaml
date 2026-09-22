@@ -1,0 +1,20 @@
+id: promise-finally
+message: Detected polyfill for Promise.prototype.finally
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Promise.prototype.finally = $_
+    - pattern: window.Promise.prototype.finally = $_
+    - pattern: globalThis.Promise.prototype.finally = $_
+    - pattern: self.Promise.prototype.finally = $_
+    - pattern: Object.defineProperty(Promise.prototype, "finally", $_)
+    - pattern: require("core-js/modules/es.promise.finally.js")
+    - pattern: require("core-js/modules/es.promise.finally")
+    - pattern: require("core-js/actual/promise/finally.js")
+    - pattern: require("core-js/actual/promise/finally")
+    - pattern: import "core-js/modules/es.promise.finally.js"
+    - pattern: import "core-js/modules/es.promise.finally"
+    - pattern: import "core-js/actual/promise/finally.js"
+    - pattern: import "core-js/actual/promise/finally"
+    - pattern: '$EXPORT({ target: "Promise", $$$ }, { finally: $IMPL })'

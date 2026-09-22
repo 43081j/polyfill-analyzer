@@ -1,0 +1,24 @@
+id: iterator-helpers
+message: Detected polyfill for Iterator Helpers (Iterator.from, map, filter, take, drop)
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Iterator.from = $_
+    - pattern: Iterator.prototype.map = $_
+    - pattern: Iterator.prototype.filter = $_
+    - pattern: Iterator.prototype.take = $_
+    - pattern: Iterator.prototype.drop = $_
+    - pattern: Iterator.prototype.toArray = $_
+    - pattern: require("core-js/modules/es.iterator.from.js")
+    - pattern: require("core-js/modules/es.iterator.from")
+    - pattern: require("core-js/modules/es.iterator.map.js")
+    - pattern: require("core-js/modules/es.iterator.map")
+    - pattern: require("core-js/modules/es.iterator.filter.js")
+    - pattern: require("core-js/modules/es.iterator.filter")
+    - pattern: require("core-js/actual/iterator/from.js")
+    - pattern: require("core-js/actual/iterator/from")
+    - pattern: import "core-js/modules/es.iterator.from.js"
+    - pattern: import "core-js/modules/es.iterator.from"
+    - pattern: import "core-js/modules/es.iterator.map.js"
+    - pattern: import "core-js/modules/es.iterator.map"

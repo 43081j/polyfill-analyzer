@@ -1,0 +1,18 @@
+id: global-this
+message: Detected polyfill for globalThis
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("core-js/modules/es.global-this.js")
+    - pattern: require("core-js/modules/es.global-this")
+    - pattern: require("core-js/actual/global-this.js")
+    - pattern: require("core-js/actual/global-this")
+    - pattern: import "core-js/modules/es.global-this.js"
+    - pattern: import "core-js/modules/es.global-this"
+    - pattern: import "core-js/actual/global-this.js"
+    - pattern: import "core-js/actual/global-this"
+    - pattern: _interopRequireDefault(require("core-js/modules/es.global-this.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.global-this"))
+    - pattern: "$EXPORT({ global: !0, $$$ }, { globalThis: $IMPL })"
+    - pattern: "$EXPORT({ global: true, $$$ }, { globalThis: $IMPL })"

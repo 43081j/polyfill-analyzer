@@ -1,0 +1,54 @@
+id: async-iteration
+message: Detected downlevel helper for asynchronous iteration
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: $_[Symbol.asyncIterator]($$$)
+    - pattern: $_[window.Symbol.asyncIterator]($$$)
+    - pattern: Symbol.asyncIterator = $_
+    - pattern: window.Symbol.asyncIterator = $_
+    - pattern: globalThis.Symbol.asyncIterator = $_
+    - pattern: self.Symbol.asyncIterator = $_
+    - pattern: Object.defineProperty(Symbol, "asyncIterator", $_)
+    - pattern: Object.defineProperty(window.Symbol, "asyncIterator", $_)
+    - pattern: Object.defineProperty(globalThis.Symbol, "asyncIterator", $_)
+    - pattern: Object.defineProperty(self.Symbol, "asyncIterator", $_)
+    - pattern: require("@babel/runtime/helpers/asyncIterator")
+    - pattern: import("@babel/runtime/helpers/asyncIterator")
+    - pattern: require("core-js/modules/es.string.iterator.js")
+    - pattern: require("core-js/modules/es.string.iterator")
+    - pattern: require("core-js/modules/es.symbol.async-iterator.js")
+    - pattern: require("core-js/modules/es.symbol.async-iterator")
+    - pattern: require("core-js/actual/string/iterator.js")
+    - pattern: require("core-js/actual/string/iterator")
+    - pattern: require("core-js/actual/symbol/async-iterator.js")
+    - pattern: require("core-js/actual/symbol/async-iterator")
+    - pattern: require("core-js/features/string/iterator.js")
+    - pattern: require("core-js/features/string/iterator")
+    - pattern: require("core-js/features/symbol/async-iterator.js")
+    - pattern: require("core-js/features/symbol/async-iterator")
+    - pattern: import "core-js/modules/es.string.iterator.js"
+    - pattern: import "core-js/modules/es.string.iterator"
+    - pattern: import "core-js/modules/es.symbol.async-iterator.js"
+    - pattern: import "core-js/modules/es.symbol.async-iterator"
+    - pattern: import "core-js/actual/string/iterator.js"
+    - pattern: import "core-js/actual/string/iterator"
+    - pattern: import "core-js/actual/symbol/async-iterator.js"
+    - pattern: import "core-js/actual/symbol/async-iterator"
+    - pattern: import "core-js/features/string/iterator.js"
+    - pattern: import "core-js/features/string/iterator"
+    - pattern: import "core-js/features/symbol/async-iterator.js"
+    - pattern: import "core-js/features/symbol/async-iterator"
+    - pattern: import("core-js/modules/es.string.iterator.js")
+    - pattern: import("core-js/modules/es.string.iterator")
+    - pattern: import("core-js/modules/es.symbol.async-iterator.js")
+    - pattern: import("core-js/modules/es.symbol.async-iterator")
+    - pattern: import("core-js/actual/string/iterator.js")
+    - pattern: import("core-js/actual/string/iterator")
+    - pattern: import("core-js/actual/symbol/async-iterator.js")
+    - pattern: import("core-js/actual/symbol/async-iterator")
+    - pattern: import("core-js/features/string/iterator.js")
+    - pattern: import("core-js/features/string/iterator")
+    - pattern: import("core-js/features/symbol/async-iterator.js")
+    - pattern: import("core-js/features/symbol/async-iterator")

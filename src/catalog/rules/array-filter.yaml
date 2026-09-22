@@ -1,0 +1,15 @@
+id: array-filter
+message: Detected polyfill for Array.prototype.filter
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("core-js/modules/es.array.filter.js")
+    - pattern: require("core-js/modules/es.array.filter")
+    - pattern: __require("core-js/modules/es.array.filter.js")
+    - pattern: __require("core-js/modules/es.array.filter")
+    - pattern: $_("core-js/modules/es.array.filter.js")
+    - pattern: $_("core-js/modules/es.array.filter")
+    - pattern: import "core-js/modules/es.array.filter.js"
+    - pattern: import "core-js/modules/es.array.filter"
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { filter: $IMPL })'

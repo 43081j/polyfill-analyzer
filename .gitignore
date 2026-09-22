@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+scratch/
+find_out.txt
+*.tmp
+*.log
+.agents/temp_test_fixtures/
+.DS_Store
+.agents

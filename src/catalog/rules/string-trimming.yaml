@@ -1,0 +1,26 @@
+id: string-trimming
+message: Detected polyfill for String.prototype.trimStart or trimEnd
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: String.prototype.trimStart = $_
+    - pattern: String.prototype.trimEnd = $_
+    - pattern: String.prototype.trimLeft = $_
+    - pattern: String.prototype.trimRight = $_
+    - pattern: Object.defineProperty(String.prototype, "trimStart", $_)
+    - pattern: Object.defineProperty(String.prototype, "trimEnd", $_)
+    - pattern: require("core-js/modules/es.string.trim-start.js")
+    - pattern: require("core-js/modules/es.string.trim-start")
+    - pattern: require("core-js/modules/es.string.trim-end.js")
+    - pattern: require("core-js/modules/es.string.trim-end")
+    - pattern: require("core-js/actual/string/trim-start.js")
+    - pattern: require("core-js/actual/string/trim-start")
+    - pattern: require("core-js/actual/string/trim-end.js")
+    - pattern: require("core-js/actual/string/trim-end")
+    - pattern: import "core-js/modules/es.string.trim-start.js"
+    - pattern: import "core-js/modules/es.string.trim-start"
+    - pattern: import "core-js/modules/es.string.trim-end.js"
+    - pattern: import "core-js/modules/es.string.trim-end"
+    - pattern: '$EXPORT({ target: "String", $$$ }, { trimStart: $IMPL })'
+    - pattern: '$EXPORT({ target: "String", $$$ }, { trimEnd: $IMPL })'

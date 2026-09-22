@@ -1,0 +1,16 @@
+id: symbol-description
+message: Detected polyfill for Symbol.prototype.description
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.defineProperty(Symbol.prototype, "description", $_)
+    - pattern: require("core-js/modules/es.symbol.description.js")
+    - pattern: require("core-js/modules/es.symbol.description")
+    - pattern: require("core-js/actual/symbol/description.js")
+    - pattern: require("core-js/actual/symbol/description")
+    - pattern: import "core-js/modules/es.symbol.description.js"
+    - pattern: import "core-js/modules/es.symbol.description"
+    - pattern: import "core-js/actual/symbol/description.js"
+    - pattern: import "core-js/actual/symbol/description"
+    - pattern: '$EXPORT({ target: "Symbol", $$$ }, { description: $IMPL })'

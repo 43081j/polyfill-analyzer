@@ -1,0 +1,20 @@
+id: float16array
+message: Detected polyfill for Float16Array and Math.f16round
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: window.Float16Array = $_
+    - pattern: globalThis.Float16Array = $_
+    - pattern: self.Float16Array = $_
+    - pattern: Math.f16round = $_
+    - pattern: require("core-js/modules/es.typed-array.float16-array.js")
+    - pattern: require("core-js/modules/es.typed-array.float16-array")
+    - pattern: require("core-js/modules/es.math.f16round.js")
+    - pattern: require("core-js/modules/es.math.f16round")
+    - pattern: require("core-js/actual/typed-array/float16-array.js")
+    - pattern: require("core-js/actual/typed-array/float16-array")
+    - pattern: import "core-js/modules/es.typed-array.float16-array.js"
+    - pattern: import "core-js/modules/es.typed-array.float16-array"
+    - pattern: import "core-js/modules/es.math.f16round.js"
+    - pattern: import "core-js/modules/es.math.f16round"

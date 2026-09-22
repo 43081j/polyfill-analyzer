@@ -1,0 +1,1 @@
+{"rules":[{"id":"test","name":"Test","astGrepRulePath":"tests/fixtures/bad_rule.yaml","webFeatureId":"test","bcdId":"test","baselineStatus":"low","baselineYear":2020,"modernSuggestion":"none","bundlers":[]}]}

@@ -1,0 +1,1 @@
+{"rules":[{"id":"large_rule","name":"Large Rule","astGrepRulePath":"tests/fixtures/large_rule.yaml","webFeatureId":"test-large","bcdId":"test.large","baselineStatus":"low","baselineYear":2020,"modernSuggestion":"none","bundlers":["webpack","rollup","esbuild","swc"]}]}

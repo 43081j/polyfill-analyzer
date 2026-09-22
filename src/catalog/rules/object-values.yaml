@@ -1,0 +1,33 @@
+id: object-values
+message: Detected polyfill for Object.values
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.values = $_
+    - pattern: window.Object.values = $_
+    - pattern: globalThis.Object.values = $_
+    - pattern: self.Object.values = $_
+    - pattern: Object.defineProperty(Object, "values", $_)
+    - pattern: Object.defineProperty(window.Object, "values", $_)
+    - pattern: Object.defineProperty(globalThis.Object, "values", $_)
+    - pattern: Object.defineProperty(self.Object, "values", $_)
+    - pattern: require("core-js/modules/es.object.values.js")
+    - pattern: require("core-js/modules/es.object.values")
+    - pattern: require("core-js/actual/object/values.js")
+    - pattern: require("core-js/actual/object/values")
+    - pattern: require("core-js/features/object/values.js")
+    - pattern: require("core-js/features/object/values")
+    - pattern: import "core-js/modules/es.object.values.js"
+    - pattern: import "core-js/modules/es.object.values"
+    - pattern: import "core-js/actual/object/values.js"
+    - pattern: import "core-js/actual/object/values"
+    - pattern: import "core-js/features/object/values.js"
+    - pattern: import "core-js/features/object/values"
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.values.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.values"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/values.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/values"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/values.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/values"))
+    - pattern: '$EXPORT({ target: "Object", $$$ }, { values: $IMPL })'

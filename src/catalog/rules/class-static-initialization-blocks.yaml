@@ -1,0 +1,23 @@
+id: class-static-initialization-blocks
+message: Detected downlevel helper for class static blocks
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: function _classStaticPrivateFieldSpecGet($$$) { $$$ }
+    - pattern: function _classStaticPrivateFieldSpecSet($$$) { $$$ }
+    - pattern: function _classStaticPrivateMethodGet($$$) { $$$ }
+    - pattern: function _classStaticPrivateMethodSet($$$) { $$$ }
+    - pattern: var _classStaticPrivateFieldSpecGet = function($$$) { $$$ }
+    - pattern: var _classStaticPrivateFieldSpecSet = function($$$) { $$$ }
+    - pattern: var _classStaticPrivateMethodGet = function($$$) { $$$ }
+    - pattern: var _classStaticPrivateMethodSet = function($$$) { $$$ }
+    - pattern: require("@babel/runtime/helpers/classStaticPrivateFieldSpecGet")
+    - pattern: import("@babel/runtime/helpers/classStaticPrivateFieldSpecGet")
+    - pattern: require("@babel/runtime/helpers/classStaticPrivateFieldSpecSet")
+    - pattern: import("@babel/runtime/helpers/classStaticPrivateFieldSpecSet")
+    - pattern: require("@babel/runtime/helpers/classStaticPrivateMethodGet")
+    - pattern: import("@babel/runtime/helpers/classStaticPrivateMethodGet")
+    - pattern: require("@babel/runtime/helpers/classStaticPrivateMethodSet")
+    - pattern: import("@babel/runtime/helpers/classStaticPrivateMethodSet")
+

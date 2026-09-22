@@ -1,0 +1,34 @@
+id: set-methods
+message: Detected polyfill for Set mathematical methods (intersection, union,
+  difference, etc.)
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Set.prototype.intersection = $_
+    - pattern: Set.prototype.union = $_
+    - pattern: Set.prototype.difference = $_
+    - pattern: Set.prototype.symmetricDifference = $_
+    - pattern: Set.prototype.isSubsetOf = $_
+    - pattern: Set.prototype.isSupersetOf = $_
+    - pattern: Set.prototype.isDisjointFrom = $_
+    - pattern: Object.defineProperty(Set.prototype, "intersection", $_)
+    - pattern: Object.defineProperty(Set.prototype, "union", $_)
+    - pattern: Object.defineProperty(Set.prototype, "difference", $_)
+    - pattern: Object.defineProperty(Set.prototype, "symmetricDifference", $_)
+    - pattern: require("core-js/modules/es.set.intersection.v2.js")
+    - pattern: require("core-js/modules/es.set.intersection.v2")
+    - pattern: require("core-js/modules/es.set.union.v2.js")
+    - pattern: require("core-js/modules/es.set.union.v2")
+    - pattern: require("core-js/modules/es.set.difference.v2.js")
+    - pattern: require("core-js/modules/es.set.difference.v2")
+    - pattern: require("core-js/actual/set/intersection.js")
+    - pattern: require("core-js/actual/set/intersection")
+    - pattern: require("core-js/actual/set/union.js")
+    - pattern: require("core-js/actual/set/union")
+    - pattern: import "core-js/modules/es.set.intersection.v2.js"
+    - pattern: import "core-js/modules/es.set.intersection.v2"
+    - pattern: import "core-js/modules/es.set.union.v2.js"
+    - pattern: import "core-js/modules/es.set.union.v2"
+    - pattern: '$EXPORT({ target: "Set", $$$ }, { intersection: $IMPL })'
+    - pattern: '$EXPORT({ target: "Set", $$$ }, { union: $IMPL })'

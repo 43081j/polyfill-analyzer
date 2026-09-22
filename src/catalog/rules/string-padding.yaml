@@ -1,0 +1,28 @@
+id: string-padding
+message: Detected polyfill for String.prototype.padStart or padEnd
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: String.prototype.padStart = $_
+    - pattern: String.prototype.padEnd = $_
+    - pattern: window.String.prototype.padStart = $_
+    - pattern: window.String.prototype.padEnd = $_
+    - pattern: globalThis.String.prototype.padStart = $_
+    - pattern: globalThis.String.prototype.padEnd = $_
+    - pattern: Object.defineProperty(String.prototype, "padStart", $_)
+    - pattern: Object.defineProperty(String.prototype, "padEnd", $_)
+    - pattern: require("core-js/modules/es.string.pad-start.js")
+    - pattern: require("core-js/modules/es.string.pad-start")
+    - pattern: require("core-js/modules/es.string.pad-end.js")
+    - pattern: require("core-js/modules/es.string.pad-end")
+    - pattern: require("core-js/actual/string/pad-start.js")
+    - pattern: require("core-js/actual/string/pad-start")
+    - pattern: require("core-js/actual/string/pad-end.js")
+    - pattern: require("core-js/actual/string/pad-end")
+    - pattern: import "core-js/modules/es.string.pad-start.js"
+    - pattern: import "core-js/modules/es.string.pad-start"
+    - pattern: import "core-js/modules/es.string.pad-end.js"
+    - pattern: import "core-js/modules/es.string.pad-end"
+    - pattern: '$EXPORT({ target: "String", $$$ }, { padStart: $IMPL })'
+    - pattern: '$EXPORT({ target: "String", $$$ }, { padEnd: $IMPL })'

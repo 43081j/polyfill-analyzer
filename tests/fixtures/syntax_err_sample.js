@@ -1,0 +1,1 @@
+function invalidSyntax( { console.log("missing close paren");

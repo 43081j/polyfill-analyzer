@@ -1,0 +1,48 @@
+id: object-assign
+message: Detected polyfill for Object.assign
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.assign = $_
+    - pattern: window.Object.assign = $_
+    - pattern: globalThis.Object.assign = $_
+    - pattern: self.Object.assign = $_
+    - pattern: Object.defineProperty(Object, "assign", $_)
+    - pattern: Object.defineProperty(window.Object, "assign", $_)
+    - pattern: Object.defineProperty(globalThis.Object, "assign", $_)
+    - pattern: Object.defineProperty(self.Object, "assign", $_)
+    - pattern: window.Object.defineProperty(Object, "assign", $_)
+    - pattern: globalThis.Object.defineProperty(Object, "assign", $_)
+    - pattern: self.Object.defineProperty(Object, "assign", $_)
+    - pattern: require("core-js/modules/es.object.assign.js")
+    - pattern: require("core-js/modules/es.object.assign")
+    - pattern: require("core-js/actual/object/assign.js")
+    - pattern: require("core-js/actual/object/assign")
+    - pattern: require("core-js/features/object/assign.js")
+    - pattern: require("core-js/features/object/assign")
+    - pattern: import "core-js/modules/es.object.assign.js"
+    - pattern: import "core-js/modules/es.object.assign"
+    - pattern: import "core-js/actual/object/assign.js"
+    - pattern: import "core-js/actual/object/assign"
+    - pattern: import "core-js/features/object/assign.js"
+    - pattern: import "core-js/features/object/assign"
+    - pattern: import("core-js/modules/es.object.assign.js")
+    - pattern: import("core-js/modules/es.object.assign")
+    - pattern: import("core-js/actual/object/assign.js")
+    - pattern: import("core-js/actual/object/assign")
+    - pattern: import("core-js/features/object/assign.js")
+    - pattern: import("core-js/features/object/assign")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.assign.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.assign"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/assign.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/assign"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/assign.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/assign"))
+    - pattern: var _extends = Object.assign || function($_) { $$$ }
+    - pattern: function _extends() { $$$ Object.assign $$$ }
+    - pattern: require("@babel/runtime/helpers/extends")
+    - pattern: import("@babel/runtime/helpers/extends")
+    - pattern: '$EXPORT({ target: "Object", $$$ }, { assign: $IMPL })'
+    - pattern: Object.assign || function($T) { for (var $I = 1; $I < arguments.length;
+        $I++) { $$$ } return $T }

@@ -1,0 +1,42 @@
+id: object-group-by
+message: Detected polyfill for Object.groupBy
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.groupBy = $_
+    - pattern: window.Object.groupBy = $_
+    - pattern: globalThis.Object.groupBy = $_
+    - pattern: self.Object.groupBy = $_
+    - pattern: Object.defineProperty(Object, "groupBy", $_)
+    - pattern: Object.defineProperty(window.Object, "groupBy", $_)
+    - pattern: Object.defineProperty(globalThis.Object, "groupBy", $_)
+    - pattern: Object.defineProperty(self.Object, "groupBy", $_)
+    - pattern: window.Object.defineProperty(Object, "groupBy", $_)
+    - pattern: globalThis.Object.defineProperty(Object, "groupBy", $_)
+    - pattern: self.Object.defineProperty(Object, "groupBy", $_)
+    - pattern: require("core-js/modules/es.object.group-by.js")
+    - pattern: require("core-js/modules/es.object.group-by")
+    - pattern: require("core-js/actual/object/group-by.js")
+    - pattern: require("core-js/actual/object/group-by")
+    - pattern: require("core-js/features/object/group-by.js")
+    - pattern: require("core-js/features/object/group-by")
+    - pattern: import "core-js/modules/es.object.group-by.js"
+    - pattern: import "core-js/modules/es.object.group-by"
+    - pattern: import "core-js/actual/object/group-by.js"
+    - pattern: import "core-js/actual/object/group-by"
+    - pattern: import "core-js/features/object/group-by.js"
+    - pattern: import "core-js/features/object/group-by"
+    - pattern: import("core-js/modules/es.object.group-by.js")
+    - pattern: import("core-js/modules/es.object.group-by")
+    - pattern: import("core-js/actual/object/group-by.js")
+    - pattern: import("core-js/actual/object/group-by")
+    - pattern: import("core-js/features/object/group-by.js")
+    - pattern: import("core-js/features/object/group-by")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.group-by.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.group-by"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/group-by.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/group-by"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/group-by.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/group-by"))
+    - pattern: '$EXPORT({ target: "Object", $$$ }, { groupBy: $IMPL })'

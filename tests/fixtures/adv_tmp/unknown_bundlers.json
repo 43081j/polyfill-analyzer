@@ -1,0 +1,1 @@
+{"rules":[{"id":"adv-test-rule","name":"Adv Test Rule","astGrepRulePath":"src/catalog/rules/test.yaml","webFeatureId":"adv-feature","bcdId":"javascript.builtins.Adv","baselineStatus":"high","baselineYear":2020,"modernSuggestion":"Use native feature","bundlers":["webpack","parcel"]}]}

@@ -1,0 +1,43 @@
+id: array-includes
+message: Detected polyfill for Array.prototype.includes
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Array.prototype.includes = $_
+    - pattern: window.Array.prototype.includes = $_
+    - pattern: globalThis.Array.prototype.includes = $_
+    - pattern: self.Array.prototype.includes = $_
+    - pattern: Object.defineProperty(Array.prototype, "includes", $_)
+    - pattern: Object.defineProperty(window.Array.prototype, "includes", $_)
+    - pattern: Object.defineProperty(globalThis.Array.prototype, "includes", $_)
+    - pattern: Object.defineProperty(self.Array.prototype, "includes", $_)
+    - pattern: window.Object.defineProperty(Array.prototype, "includes", $_)
+    - pattern: globalThis.Object.defineProperty(Array.prototype, "includes", $_)
+    - pattern: self.Object.defineProperty(Array.prototype, "includes", $_)
+    - pattern: require("core-js/modules/es.array.includes.js")
+    - pattern: require("core-js/modules/es.array.includes")
+    - pattern: require("core-js/actual/array/includes.js")
+    - pattern: require("core-js/actual/array/includes")
+    - pattern: require("core-js/features/array/includes.js")
+    - pattern: require("core-js/features/array/includes")
+    - pattern: import "core-js/modules/es.array.includes.js"
+    - pattern: import "core-js/modules/es.array.includes"
+    - pattern: import "core-js/actual/array/includes.js"
+    - pattern: import "core-js/actual/array/includes"
+    - pattern: import "core-js/features/array/includes.js"
+    - pattern: import "core-js/features/array/includes"
+    - pattern: import("core-js/modules/es.array.includes.js")
+    - pattern: import("core-js/modules/es.array.includes")
+    - pattern: import("core-js/actual/array/includes.js")
+    - pattern: import("core-js/actual/array/includes")
+    - pattern: import("core-js/features/array/includes.js")
+    - pattern: import("core-js/features/array/includes")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.includes.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.includes"))
+    - pattern: _interopRequireDefault(require("core-js/actual/array/includes.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/array/includes"))
+    - pattern: _interopRequireDefault(require("core-js/features/array/includes.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/array/includes"))
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { includes: $IMPL })'
+    - pattern: "$EXPORT({ target: 'Array', $$$ }, { includes: $IMPL })"

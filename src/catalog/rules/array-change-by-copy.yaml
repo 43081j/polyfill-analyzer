@@ -1,0 +1,43 @@
+id: array-change-by-copy
+message: Detected polyfill for Array change-by-copy methods (toReversed,
+  toSorted, toSpliced, with)
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Array.prototype.toReversed = $_
+    - pattern: Array.prototype.toSorted = $_
+    - pattern: Array.prototype.toSpliced = $_
+    - pattern: Array.prototype.with = $_
+    - pattern: Object.defineProperty(Array.prototype, "toReversed", $_)
+    - pattern: Object.defineProperty(Array.prototype, "toSorted", $_)
+    - pattern: Object.defineProperty(Array.prototype, "toSpliced", $_)
+    - pattern: Object.defineProperty(Array.prototype, "with", $_)
+    - pattern: require("core-js/modules/es.array.to-reversed.js")
+    - pattern: require("core-js/modules/es.array.to-reversed")
+    - pattern: require("core-js/modules/es.array.to-sorted.js")
+    - pattern: require("core-js/modules/es.array.to-sorted")
+    - pattern: require("core-js/modules/es.array.to-spliced.js")
+    - pattern: require("core-js/modules/es.array.to-spliced")
+    - pattern: require("core-js/modules/es.array.with.js")
+    - pattern: require("core-js/modules/es.array.with")
+    - pattern: require("core-js/actual/array/to-reversed.js")
+    - pattern: require("core-js/actual/array/to-reversed")
+    - pattern: require("core-js/actual/array/to-sorted.js")
+    - pattern: require("core-js/actual/array/to-sorted")
+    - pattern: require("core-js/actual/array/to-spliced.js")
+    - pattern: require("core-js/actual/array/to-spliced")
+    - pattern: require("core-js/actual/array/with.js")
+    - pattern: require("core-js/actual/array/with")
+    - pattern: import "core-js/modules/es.array.to-reversed.js"
+    - pattern: import "core-js/modules/es.array.to-reversed"
+    - pattern: import "core-js/modules/es.array.to-sorted.js"
+    - pattern: import "core-js/modules/es.array.to-sorted"
+    - pattern: import "core-js/modules/es.array.to-spliced.js"
+    - pattern: import "core-js/modules/es.array.to-spliced"
+    - pattern: import "core-js/modules/es.array.with.js"
+    - pattern: import "core-js/modules/es.array.with"
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { toSorted: $IMPL })'
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { toReversed: $IMPL })'
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { toSpliced: $IMPL })'
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { with: $IMPL })'

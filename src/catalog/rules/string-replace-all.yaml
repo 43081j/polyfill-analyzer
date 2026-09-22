@@ -1,0 +1,29 @@
+id: string-replace-all
+message: Detected polyfill for String.prototype.replaceAll
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: String.prototype.replaceAll = $_
+    - pattern: window.String.prototype.replaceAll = $_
+    - pattern: globalThis.String.prototype.replaceAll = $_
+    - pattern: self.String.prototype.replaceAll = $_
+    - pattern: Object.defineProperty(String.prototype, "replaceAll", $_)
+    - pattern: require("core-js/modules/es.string.replace-all.js")
+    - pattern: require("core-js/modules/es.string.replace-all")
+    - pattern: require("core-js/actual/string/replace-all.js")
+    - pattern: require("core-js/actual/string/replace-all")
+    - pattern: require("core-js/features/string/replace-all.js")
+    - pattern: require("core-js/features/string/replace-all")
+    - pattern: import "core-js/modules/es.string.replace-all.js"
+    - pattern: import "core-js/modules/es.string.replace-all"
+    - pattern: import "core-js/actual/string/replace-all.js"
+    - pattern: import "core-js/actual/string/replace-all"
+    - pattern: import "core-js/features/string/replace-all.js"
+    - pattern: import "core-js/features/string/replace-all"
+    - pattern: _interopRequireDefault(require("core-js/modules/es.string.replace-all.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.string.replace-all"))
+    - pattern: _interopRequireDefault(require("core-js/actual/string/replace-all.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/string/replace-all"))
+    - pattern: '$EXPORT({ target: "String", $$$ }, { replaceAll: $IMPL })'
+    - pattern: "$EXPORT({ target: 'String', $$$ }, { replaceAll: $IMPL })"

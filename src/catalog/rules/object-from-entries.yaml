@@ -1,0 +1,33 @@
+id: object-from-entries
+message: Detected polyfill for Object.fromEntries
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.fromEntries = $_
+    - pattern: window.Object.fromEntries = $_
+    - pattern: globalThis.Object.fromEntries = $_
+    - pattern: self.Object.fromEntries = $_
+    - pattern: Object.defineProperty(Object, "fromEntries", $_)
+    - pattern: Object.defineProperty(window.Object, "fromEntries", $_)
+    - pattern: Object.defineProperty(globalThis.Object, "fromEntries", $_)
+    - pattern: Object.defineProperty(self.Object, "fromEntries", $_)
+    - pattern: require("core-js/modules/es.object.from-entries.js")
+    - pattern: require("core-js/modules/es.object.from-entries")
+    - pattern: require("core-js/actual/object/from-entries.js")
+    - pattern: require("core-js/actual/object/from-entries")
+    - pattern: require("core-js/features/object/from-entries.js")
+    - pattern: require("core-js/features/object/from-entries")
+    - pattern: import "core-js/modules/es.object.from-entries.js"
+    - pattern: import "core-js/modules/es.object.from-entries"
+    - pattern: import "core-js/actual/object/from-entries.js"
+    - pattern: import "core-js/actual/object/from-entries"
+    - pattern: import "core-js/features/object/from-entries.js"
+    - pattern: import "core-js/features/object/from-entries"
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.from-entries.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.from-entries"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/from-entries.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/from-entries"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/from-entries.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/from-entries"))
+    - pattern: '$EXPORT({ target: "Object", $$$ }, { fromEntries: $IMPL })'

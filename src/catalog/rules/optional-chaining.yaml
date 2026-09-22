@@ -1,0 +1,10 @@
+id: optional-chaining
+message: Detected transpilation helper for Optional Chaining (?.)
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("@babel/runtime/helpers/optionalChaining")
+    - pattern: import "@babel/runtime/helpers/optionalChaining"
+    - pattern: require("@babel/runtime/helpers/interopRequireDefault")(require("@babel/runtime/helpers/optionalChaining"))
+    - pattern: function _optionalChain($_) { $$$ }

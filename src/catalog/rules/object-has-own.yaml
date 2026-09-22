@@ -1,0 +1,43 @@
+id: object-has-own
+message: Detected polyfill for Object.hasOwn
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.hasOwn = $_
+    - pattern: window.Object.hasOwn = $_
+    - pattern: globalThis.Object.hasOwn = $_
+    - pattern: self.Object.hasOwn = $_
+    - pattern: Object.defineProperty(Object, "hasOwn", $_)
+    - pattern: Object.defineProperty(window.Object, "hasOwn", $_)
+    - pattern: Object.defineProperty(globalThis.Object, "hasOwn", $_)
+    - pattern: Object.defineProperty(self.Object, "hasOwn", $_)
+    - pattern: window.Object.defineProperty(Object, "hasOwn", $_)
+    - pattern: globalThis.Object.defineProperty(Object, "hasOwn", $_)
+    - pattern: self.Object.defineProperty(Object, "hasOwn", $_)
+    - pattern: require("core-js/modules/es.object.has-own.js")
+    - pattern: require("core-js/modules/es.object.has-own")
+    - pattern: require("core-js/actual/object/has-own.js")
+    - pattern: require("core-js/actual/object/has-own")
+    - pattern: require("core-js/features/object/has-own.js")
+    - pattern: require("core-js/features/object/has-own")
+    - pattern: import "core-js/modules/es.object.has-own.js"
+    - pattern: import "core-js/modules/es.object.has-own"
+    - pattern: import "core-js/actual/object/has-own.js"
+    - pattern: import "core-js/actual/object/has-own"
+    - pattern: import "core-js/features/object/has-own.js"
+    - pattern: import "core-js/features/object/has-own"
+    - pattern: import("core-js/modules/es.object.has-own.js")
+    - pattern: import("core-js/modules/es.object.has-own")
+    - pattern: import("core-js/actual/object/has-own.js")
+    - pattern: import("core-js/actual/object/has-own")
+    - pattern: import("core-js/features/object/has-own.js")
+    - pattern: import("core-js/features/object/has-own")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.has-own.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.has-own"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/has-own.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/has-own"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/has-own.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/has-own"))
+    - pattern: '$EXPORT({ target: "Object", $$$ }, { hasOwn: $IMPL })'
+    - pattern: "$EXPORT({ target: 'Object', $$$ }, { hasOwn: $IMPL })"

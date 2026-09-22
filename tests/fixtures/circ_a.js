@@ -1,0 +1,1 @@
+import { b } from "./circ_b.js"; export const a = b + 1;

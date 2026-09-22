@@ -1,0 +1,43 @@
+id: array-at
+message: Detected polyfill for Array.prototype.at
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Array.prototype.at = $_
+    - pattern: window.Array.prototype.at = $_
+    - pattern: globalThis.Array.prototype.at = $_
+    - pattern: self.Array.prototype.at = $_
+    - pattern: Object.defineProperty(Array.prototype, "at", $_)
+    - pattern: Object.defineProperty(window.Array.prototype, "at", $_)
+    - pattern: Object.defineProperty(globalThis.Array.prototype, "at", $_)
+    - pattern: Object.defineProperty(self.Array.prototype, "at", $_)
+    - pattern: window.Object.defineProperty(Array.prototype, "at", $_)
+    - pattern: globalThis.Object.defineProperty(Array.prototype, "at", $_)
+    - pattern: self.Object.defineProperty(Array.prototype, "at", $_)
+    - pattern: require("core-js/modules/es.array.at.js")
+    - pattern: require("core-js/modules/es.array.at")
+    - pattern: require("core-js/actual/array/at.js")
+    - pattern: require("core-js/actual/array/at")
+    - pattern: require("core-js/features/array/at.js")
+    - pattern: require("core-js/features/array/at")
+    - pattern: import "core-js/modules/es.array.at.js"
+    - pattern: import "core-js/modules/es.array.at"
+    - pattern: import "core-js/actual/array/at.js"
+    - pattern: import "core-js/actual/array/at"
+    - pattern: import "core-js/features/array/at.js"
+    - pattern: import "core-js/features/array/at"
+    - pattern: import("core-js/modules/es.array.at.js")
+    - pattern: import("core-js/modules/es.array.at")
+    - pattern: import("core-js/actual/array/at.js")
+    - pattern: import("core-js/actual/array/at")
+    - pattern: import("core-js/features/array/at.js")
+    - pattern: import("core-js/features/array/at")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.at.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.at"))
+    - pattern: _interopRequireDefault(require("core-js/actual/array/at.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/array/at"))
+    - pattern: _interopRequireDefault(require("core-js/features/array/at.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/array/at"))
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { at: $IMPL })'
+    - pattern: "$EXPORT({ target: 'Array', $$$ }, { at: $IMPL })"

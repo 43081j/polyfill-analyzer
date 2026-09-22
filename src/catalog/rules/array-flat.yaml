@@ -1,0 +1,37 @@
+id: array-flat
+message: Detected polyfill for Array.prototype.flat / flatMap
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Array.prototype.flat = $_
+    - pattern: Array.prototype.flatMap = $_
+    - pattern: window.Array.prototype.flat = $_
+    - pattern: globalThis.Array.prototype.flat = $_
+    - pattern: self.Array.prototype.flat = $_
+    - pattern: Object.defineProperty(Array.prototype, "flat", $_)
+    - pattern: Object.defineProperty(Array.prototype, "flatMap", $_)
+    - pattern: require("core-js/modules/es.array.flat.js")
+    - pattern: require("core-js/modules/es.array.flat")
+    - pattern: require("core-js/modules/es.array.flat-map.js")
+    - pattern: require("core-js/modules/es.array.flat-map")
+    - pattern: require("core-js/actual/array/flat.js")
+    - pattern: require("core-js/actual/array/flat")
+    - pattern: require("core-js/actual/array/flat-map.js")
+    - pattern: require("core-js/actual/array/flat-map")
+    - pattern: require("core-js/features/array/flat.js")
+    - pattern: require("core-js/features/array/flat")
+    - pattern: import "core-js/modules/es.array.flat.js"
+    - pattern: import "core-js/modules/es.array.flat"
+    - pattern: import "core-js/modules/es.array.flat-map.js"
+    - pattern: import "core-js/modules/es.array.flat-map"
+    - pattern: import "core-js/actual/array/flat.js"
+    - pattern: import "core-js/actual/array/flat"
+    - pattern: import "core-js/features/array/flat.js"
+    - pattern: import "core-js/features/array/flat"
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.flat.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.flat"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.flat-map.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.flat-map"))
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { flat: $IMPL })'
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { flatMap: $IMPL })'

@@ -1,0 +1,42 @@
+id: promise-any
+message: Detected polyfill for Promise.any
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Promise.any = $_
+    - pattern: window.Promise.any = $_
+    - pattern: globalThis.Promise.any = $_
+    - pattern: self.Promise.any = $_
+    - pattern: Object.defineProperty(Promise, "any", $_)
+    - pattern: Object.defineProperty(window.Promise, "any", $_)
+    - pattern: Object.defineProperty(globalThis.Promise, "any", $_)
+    - pattern: Object.defineProperty(self.Promise, "any", $_)
+    - pattern: window.Object.defineProperty(Promise, "any", $_)
+    - pattern: globalThis.Object.defineProperty(Promise, "any", $_)
+    - pattern: self.Object.defineProperty(Promise, "any", $_)
+    - pattern: require("core-js/modules/es.promise.any.js")
+    - pattern: require("core-js/modules/es.promise.any")
+    - pattern: require("core-js/actual/promise/any.js")
+    - pattern: require("core-js/actual/promise/any")
+    - pattern: require("core-js/features/promise/any.js")
+    - pattern: require("core-js/features/promise/any")
+    - pattern: import "core-js/modules/es.promise.any.js"
+    - pattern: import "core-js/modules/es.promise.any"
+    - pattern: import "core-js/actual/promise/any.js"
+    - pattern: import "core-js/actual/promise/any"
+    - pattern: import "core-js/features/promise/any.js"
+    - pattern: import "core-js/features/promise/any"
+    - pattern: import("core-js/modules/es.promise.any.js")
+    - pattern: import("core-js/modules/es.promise.any")
+    - pattern: import("core-js/actual/promise/any.js")
+    - pattern: import("core-js/actual/promise/any")
+    - pattern: import("core-js/features/promise/any.js")
+    - pattern: import("core-js/features/promise/any")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.promise.any.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.promise.any"))
+    - pattern: _interopRequireDefault(require("core-js/actual/promise/any.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/promise/any"))
+    - pattern: _interopRequireDefault(require("core-js/features/promise/any.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/promise/any"))
+    - pattern: '$EXPORT({ target: "Promise", $$$ }, { any: $IMPL })'

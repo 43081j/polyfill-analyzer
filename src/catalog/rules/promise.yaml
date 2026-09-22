@@ -1,0 +1,16 @@
+id: promise
+message: Detected polyfill for Promise
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("core-js/modules/es.promise.js")
+    - pattern: require("core-js/modules/es.promise")
+    - pattern: __require("core-js/modules/es.promise.js")
+    - pattern: __require("core-js/modules/es.promise")
+    - pattern: $_("core-js/modules/es.promise.js")
+    - pattern: $_("core-js/modules/es.promise")
+    - pattern: import "core-js/modules/es.promise.js"
+    - pattern: import "core-js/modules/es.promise"
+    - pattern: "$EXPORT({ global: !0, $$$ }, { Promise: $IMPL })"
+    - pattern: "$EXPORT({ global: true, $$$ }, { Promise: $IMPL })"

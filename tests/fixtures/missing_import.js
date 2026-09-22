@@ -1,0 +1,1 @@
+import { nonExistent } from "./does_not_exist_12345.js"; console.log(nonExistent);

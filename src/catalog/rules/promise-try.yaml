@@ -1,0 +1,20 @@
+id: promise-try
+message: Detected polyfill for Promise.try
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Promise.try = $_
+    - pattern: window.Promise.try = $_
+    - pattern: globalThis.Promise.try = $_
+    - pattern: self.Promise.try = $_
+    - pattern: Object.defineProperty(Promise, "try", $_)
+    - pattern: require("core-js/modules/es.promise.try.js")
+    - pattern: require("core-js/modules/es.promise.try")
+    - pattern: require("core-js/actual/promise/try.js")
+    - pattern: require("core-js/actual/promise/try")
+    - pattern: import "core-js/modules/es.promise.try.js"
+    - pattern: import "core-js/modules/es.promise.try"
+    - pattern: import "core-js/actual/promise/try.js"
+    - pattern: import "core-js/actual/promise/try"
+    - pattern: '$EXPORT({ target: "Promise", $$$ }, { try: $IMPL })'

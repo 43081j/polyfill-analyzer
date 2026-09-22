@@ -1,0 +1,45 @@
+id: promise-all-settled
+message: Detected polyfill for Promise.allSettled
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Promise.allSettled = $_
+    - pattern: window.Promise.allSettled = $_
+    - pattern: globalThis.Promise.allSettled = $_
+    - pattern: self.Promise.allSettled = $_
+    - pattern: Object.defineProperty(Promise, "allSettled", $_)
+    - pattern: Object.defineProperty(window.Promise, "allSettled", $_)
+    - pattern: Object.defineProperty(globalThis.Promise, "allSettled", $_)
+    - pattern: Object.defineProperty(self.Promise, "allSettled", $_)
+    - pattern: window.Object.defineProperty(Promise, "allSettled", $_)
+    - pattern: globalThis.Object.defineProperty(Promise, "allSettled", $_)
+    - pattern: self.Object.defineProperty(Promise, "allSettled", $_)
+    - pattern: require("core-js/modules/es.promise.all-settled.js")
+    - pattern: require("core-js/modules/es.promise.all-settled")
+    - pattern: require("core-js/modules/esnext.promise.all-settled.js")
+    - pattern: require("core-js/modules/esnext.promise.all-settled")
+    - pattern: require("core-js/actual/promise/all-settled.js")
+    - pattern: require("core-js/actual/promise/all-settled")
+    - pattern: require("core-js/features/promise/all-settled.js")
+    - pattern: require("core-js/features/promise/all-settled")
+    - pattern: import "core-js/modules/es.promise.all-settled.js"
+    - pattern: import "core-js/modules/es.promise.all-settled"
+    - pattern: import "core-js/actual/promise/all-settled.js"
+    - pattern: import "core-js/actual/promise/all-settled"
+    - pattern: import "core-js/features/promise/all-settled.js"
+    - pattern: import "core-js/features/promise/all-settled"
+    - pattern: import("core-js/modules/es.promise.all-settled.js")
+    - pattern: import("core-js/modules/es.promise.all-settled")
+    - pattern: import("core-js/actual/promise/all-settled.js")
+    - pattern: import("core-js/actual/promise/all-settled")
+    - pattern: import("core-js/features/promise/all-settled.js")
+    - pattern: import("core-js/features/promise/all-settled")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.promise.all-settled.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.promise.all-settled"))
+    - pattern: _interopRequireDefault(require("core-js/actual/promise/all-settled.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/promise/all-settled"))
+    - pattern: _interopRequireDefault(require("core-js/features/promise/all-settled.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/promise/all-settled"))
+    - pattern: '$EXPORT({ target: "Promise", $$$ }, { allSettled: $IMPL })'
+    - pattern: "$EXPORT({ target: 'Promise', $$$ }, { allSettled: $IMPL })"

@@ -1,0 +1,3 @@
+id: test
+rule: [unclosed array
+  pattern: $A

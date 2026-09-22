@@ -1,0 +1,632 @@
+{
+  "rules": [
+    {
+      "id": "array-iterator",
+      "name": "Array.prototype[Symbol.iterator]",
+      "astGrepRulePath": "src/catalog/rules/array-iterator.yaml",
+      "webFeatureId": "array-iterator",
+      "bcdId": "javascript.builtins.Array.Symbol_iterator",
+      "baselineStatus": "high",
+      "baselineYear": 2015,
+      "modernSuggestion": "Remove polyfill for Array iterator; widely available in Baseline 2015 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "iterators-and-for-of-statement",
+      "webFeaturesId": "iterators"
+    },
+    {
+      "id": "array-filter",
+      "name": "Array.prototype.filter",
+      "astGrepRulePath": "src/catalog/rules/array-filter.yaml",
+      "webFeatureId": "array-filter",
+      "bcdId": "javascript.builtins.Array.filter",
+      "baselineStatus": "high",
+      "baselineYear": 2015,
+      "modernSuggestion": "Remove polyfill for Array.prototype.filter; widely available in Baseline 2015 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "array-prototype-filter",
+      "webFeaturesId": "array-iteration-methods"
+    },
+    {
+      "id": "promise",
+      "name": "Promise",
+      "astGrepRulePath": "src/catalog/rules/promise.yaml",
+      "webFeatureId": "promise",
+      "bcdId": "javascript.builtins.Promise",
+      "baselineStatus": "high",
+      "baselineYear": 2015,
+      "modernSuggestion": "Remove polyfill for Promise; widely available in Baseline 2015 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "promise-objects",
+      "webFeaturesId": "promise"
+    },
+    {
+      "id": "promise-all-settled",
+      "name": "Promise.allSettled",
+      "astGrepRulePath": "src/catalog/rules/promise-all-settled.yaml",
+      "webFeatureId": "promise-all-settled",
+      "bcdId": "javascript.builtins.Promise.allSettled",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for Promise.allSettled; widely available in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "promise-allsettled",
+      "webFeaturesId": "promise-allsettled"
+    },
+    {
+      "id": "promise-any",
+      "name": "Promise.any",
+      "astGrepRulePath": "src/catalog/rules/promise-any.yaml",
+      "webFeatureId": "promise-any",
+      "bcdId": "javascript.builtins.Promise.any",
+      "baselineStatus": "high",
+      "baselineYear": 2021,
+      "modernSuggestion": "Remove polyfill for Promise.any; widely available in Baseline 2021 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "promise-any",
+      "webFeaturesId": "promise-any"
+    },
+    {
+      "id": "promise-with-resolvers",
+      "name": "Promise.withResolvers",
+      "astGrepRulePath": "src/catalog/rules/promise-with-resolvers.yaml",
+      "webFeatureId": "promise-with-resolvers",
+      "bcdId": "javascript.builtins.Promise.withResolvers",
+      "baselineStatus": "low",
+      "baselineYear": 2024,
+      "modernSuggestion": "Consider native Promise.withResolvers as support reaches Baseline.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "promise-withresolvers",
+      "webFeaturesId": "promise-withresolvers"
+    },
+    {
+      "id": "async-iteration",
+      "name": "Asynchronous Iteration",
+      "astGrepRulePath": "src/catalog/rules/async-iteration.yaml",
+      "webFeatureId": "async-iteration",
+      "bcdId": "javascript.statements.for_await_of",
+      "baselineStatus": "high",
+      "baselineYear": 2018,
+      "modernSuggestion": "Remove async iteration downleveling; native async iteration is supported in Baseline 2018.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "async-iteration",
+      "webFeaturesId": "async-iterators"
+    },
+    {
+      "id": "array-includes",
+      "name": "Array.prototype.includes",
+      "astGrepRulePath": "src/catalog/rules/array-includes.yaml",
+      "webFeatureId": "array-includes",
+      "bcdId": "javascript.builtins.Array.includes",
+      "baselineStatus": "high",
+      "baselineYear": 2016,
+      "modernSuggestion": "Remove polyfill for Array.prototype.includes; widely available in Baseline 2016 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "array-prototype-includes",
+      "webFeaturesId": "array-includes"
+    },
+    {
+      "id": "array-find-last",
+      "name": "Array.prototype.findLast",
+      "astGrepRulePath": "src/catalog/rules/array-find-last.yaml",
+      "webFeatureId": "array-find-last",
+      "bcdId": "javascript.builtins.Array.findLast",
+      "baselineStatus": "high",
+      "baselineYear": 2023,
+      "modernSuggestion": "Remove polyfill for Array.prototype.findLast; widely available in Baseline 2023 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "array-prototype-findlast",
+      "webFeaturesId": "array-findlast"
+    },
+    {
+      "id": "array-at",
+      "name": "Array.prototype.at",
+      "astGrepRulePath": "src/catalog/rules/array-at.yaml",
+      "webFeatureId": "array-at",
+      "bcdId": "javascript.builtins.Array.at",
+      "baselineStatus": "high",
+      "baselineYear": 2022,
+      "modernSuggestion": "Remove polyfill for Array.prototype.at; supported in Baseline 2022 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "at-method-on-indexable-objects",
+      "webFeaturesId": "array-at"
+    },
+    {
+      "id": "class-fields",
+      "name": "Class Public/Private Fields",
+      "astGrepRulePath": "src/catalog/rules/class-fields.yaml",
+      "webFeatureId": "class-fields",
+      "bcdId": "javascript.classes.private_class_fields",
+      "baselineStatus": "high",
+      "baselineYear": 2022,
+      "modernSuggestion": "Remove class fields downlevel helpers; native class fields supported in Baseline 2022.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "webFeaturesId": "class-syntax"
+    },
+    {
+      "id": "class-static-initialization-blocks",
+      "name": "Class Static Blocks",
+      "astGrepRulePath": "src/catalog/rules/class-static-initialization-blocks.yaml",
+      "webFeatureId": "class-static-block",
+      "bcdId": "javascript.classes.static_initialization_blocks",
+      "baselineStatus": "high",
+      "baselineYear": 2022,
+      "modernSuggestion": "Remove static initialization block transpilation; native support in Baseline 2022.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "webFeaturesId": "class-static-initialization-blocks"
+    },
+    {
+      "id": "object-assign",
+      "name": "Object.assign",
+      "astGrepRulePath": "src/catalog/rules/object-assign.yaml",
+      "webFeatureId": "object-assign",
+      "bcdId": "javascript.builtins.Object.assign",
+      "baselineStatus": "high",
+      "baselineYear": 2015,
+      "modernSuggestion": "Remove polyfill for Object.assign; widely available since ES2015 / Baseline 2015.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "object-assign",
+      "webFeaturesId": "object-object"
+    },
+    {
+      "id": "object-has-own",
+      "name": "Object.hasOwn",
+      "astGrepRulePath": "src/catalog/rules/object-has-own.yaml",
+      "webFeatureId": "object-hasown",
+      "bcdId": "javascript.builtins.Object.hasOwn",
+      "baselineStatus": "high",
+      "baselineYear": 2022,
+      "modernSuggestion": "Remove polyfill for Object.hasOwn; available in Baseline 2022 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "object-hasown",
+      "webFeaturesId": "object-hasown"
+    },
+    {
+      "id": "object-group-by",
+      "name": "Object.groupBy",
+      "astGrepRulePath": "src/catalog/rules/object-group-by.yaml",
+      "webFeatureId": "object-group-by",
+      "bcdId": "javascript.builtins.Object.groupBy",
+      "baselineStatus": "low",
+      "baselineYear": 2024,
+      "modernSuggestion": "Consider native Object.groupBy as support reaches Baseline.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "ecmascript-2024-15th-edition-code-samples",
+      "webFeaturesId": "array-group"
+    },
+    {
+      "id": "object-entries",
+      "name": "Object.entries",
+      "astGrepRulePath": "src/catalog/rules/object-entries.yaml",
+      "webFeatureId": "object-entries",
+      "bcdId": "javascript.builtins.Object.entries",
+      "baselineStatus": "high",
+      "baselineYear": 2017,
+      "modernSuggestion": "Remove polyfill for Object.entries; widely available since ES2017 / Baseline 2017.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "object-entries",
+      "webFeaturesId": "object-object"
+    },
+    {
+      "id": "object-values",
+      "name": "Object.values",
+      "astGrepRulePath": "src/catalog/rules/object-values.yaml",
+      "webFeatureId": "object-values",
+      "bcdId": "javascript.builtins.Object.values",
+      "baselineStatus": "high",
+      "baselineYear": 2017,
+      "modernSuggestion": "Remove polyfill for Object.values; widely available since ES2017 / Baseline 2017.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "object-values",
+      "webFeaturesId": "object-object"
+    },
+    {
+      "id": "object-from-entries",
+      "name": "Object.fromEntries",
+      "astGrepRulePath": "src/catalog/rules/object-from-entries.yaml",
+      "webFeatureId": "object-from-entries",
+      "bcdId": "javascript.builtins.Object.fromEntries",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for Object.fromEntries; available in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "object-fromentries",
+      "webFeaturesId": "object-object"
+    },
+    {
+      "id": "array-flat",
+      "name": "Array.prototype.flat / flatMap",
+      "astGrepRulePath": "src/catalog/rules/array-flat.yaml",
+      "webFeatureId": "array-flat",
+      "bcdId": "javascript.builtins.Array.flat",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for Array.prototype.flat / flatMap; available in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "ecmascript-2019-10th-edition-code-samples",
+      "webFeaturesId": "array-flat"
+    },
+    {
+      "id": "string-replace-all",
+      "name": "String.prototype.replaceAll",
+      "astGrepRulePath": "src/catalog/rules/string-replace-all.yaml",
+      "webFeatureId": "string-replace-all",
+      "bcdId": "javascript.builtins.String.replaceAll",
+      "baselineStatus": "high",
+      "baselineYear": 2021,
+      "modernSuggestion": "Remove polyfill for String.prototype.replaceAll; available in Baseline 2021 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "string-prototype-replaceall",
+      "webFeaturesId": "string-replaceall"
+    },
+    {
+      "id": "array-change-by-copy",
+      "name": "Array Change-by-Copy Methods",
+      "astGrepRulePath": "src/catalog/rules/array-change-by-copy.yaml",
+      "webFeatureId": "array-change-by-copy",
+      "bcdId": "javascript.builtins.Array.toSorted",
+      "baselineStatus": "high",
+      "baselineYear": 2023,
+      "modernSuggestion": "Remove polyfill for Array change-by-copy methods; supported in Baseline 2023 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "array-prototype-tosorted",
+      "webFeaturesId": "array-by-copy"
+    },
+    {
+      "id": "set-methods",
+      "name": "Set Mathematical Methods",
+      "astGrepRulePath": "src/catalog/rules/set-methods.yaml",
+      "webFeatureId": "set-methods",
+      "bcdId": "javascript.builtins.Set.intersection",
+      "baselineStatus": "low",
+      "baselineYear": 2025,
+      "modernSuggestion": "Consider native Set mathematical methods as support reaches Baseline.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "set-prototype-intersection",
+      "webFeaturesId": "set-methods"
+    },
+    {
+      "id": "iterator-helpers",
+      "name": "Iterator Helpers",
+      "astGrepRulePath": "src/catalog/rules/iterator-helpers.yaml",
+      "webFeatureId": "iterator-helpers",
+      "bcdId": "javascript.builtins.Iterator",
+      "baselineStatus": "low",
+      "baselineYear": 2025,
+      "modernSuggestion": "Consider native Iterator helpers as support reaches Baseline.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "iterator-helpers",
+      "webFeaturesId": "iterators"
+    },
+    {
+      "id": "promise-try",
+      "name": "Promise.try",
+      "astGrepRulePath": "src/catalog/rules/promise-try.yaml",
+      "webFeatureId": "promise-try",
+      "bcdId": "javascript.builtins.Promise.try",
+      "baselineStatus": "low",
+      "baselineYear": 2025,
+      "modernSuggestion": "Consider native Promise.try as support reaches Baseline.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "promise-try",
+      "webFeaturesId": "promise-try"
+    },
+    {
+      "id": "float16array",
+      "name": "Float16Array",
+      "astGrepRulePath": "src/catalog/rules/float16array.yaml",
+      "webFeatureId": "float16array",
+      "bcdId": "javascript.builtins.Float16Array",
+      "baselineStatus": "low",
+      "baselineYear": 2025,
+      "modernSuggestion": "Consider native Float16Array as support reaches Baseline.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "float16array",
+      "webFeaturesId": "float16array"
+    },
+    {
+      "id": "string-padding",
+      "name": "String.prototype.padStart / padEnd",
+      "astGrepRulePath": "src/catalog/rules/string-padding.yaml",
+      "webFeatureId": "string-padding",
+      "bcdId": "javascript.builtins.String.padStart",
+      "baselineStatus": "high",
+      "baselineYear": 2017,
+      "modernSuggestion": "Remove polyfill for String padding; widely available since Baseline 2017.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "string-prototype-padstart",
+      "webFeaturesId": "string-pad"
+    },
+    {
+      "id": "promise-finally",
+      "name": "Promise.prototype.finally",
+      "astGrepRulePath": "src/catalog/rules/promise-finally.yaml",
+      "webFeatureId": "promise-finally",
+      "bcdId": "javascript.builtins.Promise.finally",
+      "baselineStatus": "high",
+      "baselineYear": 2018,
+      "modernSuggestion": "Remove polyfill for Promise.prototype.finally; widely available in Baseline 2018.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "promise-prototype-finally",
+      "webFeaturesId": "promise-finally"
+    },
+    {
+      "id": "string-trimming",
+      "name": "String.prototype.trimStart / trimEnd",
+      "astGrepRulePath": "src/catalog/rules/string-trimming.yaml",
+      "webFeatureId": "string-trimming",
+      "bcdId": "javascript.builtins.String.trimStart",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for String trimStart/trimEnd; available in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "string-prototype-trimstart",
+      "webFeaturesId": "string-trim-startend"
+    },
+    {
+      "id": "string-match-all",
+      "name": "String.prototype.matchAll",
+      "astGrepRulePath": "src/catalog/rules/string-match-all.yaml",
+      "webFeatureId": "string-match-all",
+      "bcdId": "javascript.builtins.String.matchAll",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for String.prototype.matchAll; available in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "string-prototype-matchall",
+      "webFeaturesId": "string-matchall"
+    },
+    {
+      "id": "symbol-description",
+      "name": "Symbol.prototype.description",
+      "astGrepRulePath": "src/catalog/rules/symbol-description.yaml",
+      "webFeatureId": "symbol-description",
+      "bcdId": "javascript.builtins.Symbol.description",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for Symbol.prototype.description; available in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "symbol-prototype-description",
+      "webFeaturesId": "symbol"
+    },
+    {
+      "id": "nullish-coalescing",
+      "name": "Nullish Coalescing Operator (??)",
+      "astGrepRulePath": "src/catalog/rules/nullish-coalescing.yaml",
+      "webFeatureId": "nullish-coalescing",
+      "bcdId": "javascript.operators.nullish_coalescing",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove nullish coalescing transpilation helpers; supported in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "nullish-coalescing-operator",
+      "webFeaturesId": "nullish-coalescing"
+    },
+    {
+      "id": "optional-chaining",
+      "name": "Optional Chaining Operator (?.)",
+      "astGrepRulePath": "src/catalog/rules/optional-chaining.yaml",
+      "webFeatureId": "optional-chaining",
+      "bcdId": "javascript.operators.optional_chaining",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove optional chaining transpilation helpers; supported in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "optional-chaining-operator",
+      "webFeaturesId": "object-object"
+    },
+    {
+      "id": "global-this",
+      "name": "globalThis",
+      "astGrepRulePath": "src/catalog/rules/global-this.yaml",
+      "webFeatureId": "globalthis",
+      "bcdId": "javascript.builtins.globalThis",
+      "baselineStatus": "high",
+      "baselineYear": 2020,
+      "modernSuggestion": "Remove polyfill for globalThis; supported in Baseline 2020 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "globalthis",
+      "webFeaturesId": "globalthis"
+    },
+    {
+      "id": "object-rest-spread",
+      "name": "Object Rest/Spread Properties",
+      "astGrepRulePath": "src/catalog/rules/object-rest-spread.yaml",
+      "webFeatureId": "object-rest-spread",
+      "bcdId": "javascript.operators.spread.spread_in_object_literals",
+      "baselineStatus": "high",
+      "baselineYear": 2018,
+      "modernSuggestion": "Remove object rest/spread transpilation helpers; supported in Baseline 2018 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "rest-and-spread-properties-for-objects",
+      "webFeaturesId": "object-object"
+    },
+    {
+      "id": "async-generator",
+      "name": "Async Generator Functions",
+      "astGrepRulePath": "src/catalog/rules/async-generator.yaml",
+      "webFeatureId": "async-iteration",
+      "bcdId": "javascript.statements.async_generator_function",
+      "baselineStatus": "high",
+      "baselineYear": 2018,
+      "modernSuggestion": "Remove async generator transpilation helpers; supported in Baseline 2018 browsers.",
+      "bundlers": [
+        "webpack",
+        "rollup",
+        "esbuild",
+        "swc"
+      ],
+      "esSamplesId": "async-iteration",
+      "webFeaturesId": "async-iterators"
+    }
+  ]
+}

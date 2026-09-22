@@ -1,0 +1,33 @@
+id: object-entries
+message: Detected polyfill for Object.entries
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Object.entries = $_
+    - pattern: window.Object.entries = $_
+    - pattern: globalThis.Object.entries = $_
+    - pattern: self.Object.entries = $_
+    - pattern: Object.defineProperty(Object, "entries", $_)
+    - pattern: Object.defineProperty(window.Object, "entries", $_)
+    - pattern: Object.defineProperty(globalThis.Object, "entries", $_)
+    - pattern: Object.defineProperty(self.Object, "entries", $_)
+    - pattern: require("core-js/modules/es.object.entries.js")
+    - pattern: require("core-js/modules/es.object.entries")
+    - pattern: require("core-js/actual/object/entries.js")
+    - pattern: require("core-js/actual/object/entries")
+    - pattern: require("core-js/features/object/entries.js")
+    - pattern: require("core-js/features/object/entries")
+    - pattern: import "core-js/modules/es.object.entries.js"
+    - pattern: import "core-js/modules/es.object.entries"
+    - pattern: import "core-js/actual/object/entries.js"
+    - pattern: import "core-js/actual/object/entries"
+    - pattern: import "core-js/features/object/entries.js"
+    - pattern: import "core-js/features/object/entries"
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.entries.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.object.entries"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/entries.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/object/entries"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/entries.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/object/entries"))
+    - pattern: '$EXPORT({ target: "Object", $$$ }, { entries: $IMPL })'

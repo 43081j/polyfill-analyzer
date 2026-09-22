@@ -1,0 +1,43 @@
+id: array-find-last
+message: Detected polyfill for Array.prototype.findLast
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Array.prototype.findLast = $_
+    - pattern: window.Array.prototype.findLast = $_
+    - pattern: globalThis.Array.prototype.findLast = $_
+    - pattern: self.Array.prototype.findLast = $_
+    - pattern: Object.defineProperty(Array.prototype, "findLast", $_)
+    - pattern: Object.defineProperty(window.Array.prototype, "findLast", $_)
+    - pattern: Object.defineProperty(globalThis.Array.prototype, "findLast", $_)
+    - pattern: Object.defineProperty(self.Array.prototype, "findLast", $_)
+    - pattern: window.Object.defineProperty(Array.prototype, "findLast", $_)
+    - pattern: globalThis.Object.defineProperty(Array.prototype, "findLast", $_)
+    - pattern: self.Object.defineProperty(Array.prototype, "findLast", $_)
+    - pattern: require("core-js/modules/es.array.find-last.js")
+    - pattern: require("core-js/modules/es.array.find-last")
+    - pattern: require("core-js/actual/array/find-last.js")
+    - pattern: require("core-js/actual/array/find-last")
+    - pattern: require("core-js/features/array/find-last.js")
+    - pattern: require("core-js/features/array/find-last")
+    - pattern: import "core-js/modules/es.array.find-last.js"
+    - pattern: import "core-js/modules/es.array.find-last"
+    - pattern: import "core-js/actual/array/find-last.js"
+    - pattern: import "core-js/actual/array/find-last"
+    - pattern: import "core-js/features/array/find-last.js"
+    - pattern: import "core-js/features/array/find-last"
+    - pattern: import("core-js/modules/es.array.find-last.js")
+    - pattern: import("core-js/modules/es.array.find-last")
+    - pattern: import("core-js/actual/array/find-last.js")
+    - pattern: import("core-js/actual/array/find-last")
+    - pattern: import("core-js/features/array/find-last.js")
+    - pattern: import("core-js/features/array/find-last")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.find-last.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.array.find-last"))
+    - pattern: _interopRequireDefault(require("core-js/actual/array/find-last.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/array/find-last"))
+    - pattern: _interopRequireDefault(require("core-js/features/array/find-last.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/array/find-last"))
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { findLast: $IMPL })'
+    - pattern: '$EXPORT({ target: "Array", $$$ }, { findLastIndex: $IMPL })'

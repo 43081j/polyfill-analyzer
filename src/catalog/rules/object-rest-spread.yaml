@@ -1,0 +1,17 @@
+id: object-rest-spread
+message: Detected transpilation helper for Object Rest/Spread properties
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("@babel/runtime/helpers/objectSpread")
+    - pattern: require("@babel/runtime/helpers/objectSpread2")
+    - pattern: import "@babel/runtime/helpers/objectSpread"
+    - pattern: import "@babel/runtime/helpers/objectSpread2"
+    - pattern: function _objectSpread($_) { $$$ }
+    - pattern: function _objectSpread2($_) { $$$ }
+    - pattern: require("@babel/runtime/helpers/objectWithoutProperties")
+    - pattern: import "@babel/runtime/helpers/objectWithoutProperties"
+    - pattern: function _objectWithoutProperties($_, $_) { $$$ }
+    - pattern: function $FN($T) { for (var $I = 1; $I < arguments.length; $I++) { $$$
+        Object.getOwnPropertySymbols $$$ } return $T }

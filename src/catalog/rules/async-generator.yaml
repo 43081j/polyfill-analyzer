@@ -1,0 +1,10 @@
+id: async-generator
+message: Detected transpilation helper for Async Generator Functions
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: require("@babel/runtime/helpers/wrapAsyncGenerator")
+    - pattern: import "@babel/runtime/helpers/wrapAsyncGenerator"
+    - pattern: require("@babel/runtime/helpers/interopRequireDefault")(require("@babel/runtime/helpers/wrapAsyncGenerator"))
+    - pattern: function _wrapAsyncGenerator($_) { $$$ }

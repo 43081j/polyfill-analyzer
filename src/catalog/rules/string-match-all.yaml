@@ -1,0 +1,20 @@
+id: string-match-all
+message: Detected polyfill for String.prototype.matchAll
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: String.prototype.matchAll = $_
+    - pattern: window.String.prototype.matchAll = $_
+    - pattern: globalThis.String.prototype.matchAll = $_
+    - pattern: self.String.prototype.matchAll = $_
+    - pattern: Object.defineProperty(String.prototype, "matchAll", $_)
+    - pattern: require("core-js/modules/es.string.match-all.js")
+    - pattern: require("core-js/modules/es.string.match-all")
+    - pattern: require("core-js/actual/string/match-all.js")
+    - pattern: require("core-js/actual/string/match-all")
+    - pattern: import "core-js/modules/es.string.match-all.js"
+    - pattern: import "core-js/modules/es.string.match-all"
+    - pattern: import "core-js/actual/string/match-all.js"
+    - pattern: import "core-js/actual/string/match-all"
+    - pattern: '$EXPORT({ target: "String", $$$ }, { matchAll: $IMPL })'

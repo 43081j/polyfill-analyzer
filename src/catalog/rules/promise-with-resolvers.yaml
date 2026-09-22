@@ -1,0 +1,42 @@
+id: promise-with-resolvers
+message: Detected polyfill for Promise.withResolvers
+severity: info
+language: javascript
+rule:
+  any:
+    - pattern: Promise.withResolvers = $_
+    - pattern: window.Promise.withResolvers = $_
+    - pattern: globalThis.Promise.withResolvers = $_
+    - pattern: self.Promise.withResolvers = $_
+    - pattern: Object.defineProperty(Promise, "withResolvers", $_)
+    - pattern: Object.defineProperty(window.Promise, "withResolvers", $_)
+    - pattern: Object.defineProperty(globalThis.Promise, "withResolvers", $_)
+    - pattern: Object.defineProperty(self.Promise, "withResolvers", $_)
+    - pattern: window.Object.defineProperty(Promise, "withResolvers", $_)
+    - pattern: globalThis.Object.defineProperty(Promise, "withResolvers", $_)
+    - pattern: self.Object.defineProperty(Promise, "withResolvers", $_)
+    - pattern: require("core-js/modules/es.promise.with-resolvers.js")
+    - pattern: require("core-js/modules/es.promise.with-resolvers")
+    - pattern: require("core-js/actual/promise/with-resolvers.js")
+    - pattern: require("core-js/actual/promise/with-resolvers")
+    - pattern: require("core-js/features/promise/with-resolvers.js")
+    - pattern: require("core-js/features/promise/with-resolvers")
+    - pattern: import "core-js/modules/es.promise.with-resolvers.js"
+    - pattern: import "core-js/modules/es.promise.with-resolvers"
+    - pattern: import "core-js/actual/promise/with-resolvers.js"
+    - pattern: import "core-js/actual/promise/with-resolvers"
+    - pattern: import "core-js/features/promise/with-resolvers.js"
+    - pattern: import "core-js/features/promise/with-resolvers"
+    - pattern: import("core-js/modules/es.promise.with-resolvers.js")
+    - pattern: import("core-js/modules/es.promise.with-resolvers")
+    - pattern: import("core-js/actual/promise/with-resolvers.js")
+    - pattern: import("core-js/actual/promise/with-resolvers")
+    - pattern: import("core-js/features/promise/with-resolvers.js")
+    - pattern: import("core-js/features/promise/with-resolvers")
+    - pattern: _interopRequireDefault(require("core-js/modules/es.promise.with-resolvers.js"))
+    - pattern: _interopRequireDefault(require("core-js/modules/es.promise.with-resolvers"))
+    - pattern: _interopRequireDefault(require("core-js/actual/promise/with-resolvers.js"))
+    - pattern: _interopRequireDefault(require("core-js/actual/promise/with-resolvers"))
+    - pattern: _interopRequireDefault(require("core-js/features/promise/with-resolvers.js"))
+    - pattern: _interopRequireDefault(require("core-js/features/promise/with-resolvers"))
+    - pattern: '$EXPORT({ target: "Promise", $$$ }, { withResolvers: $IMPL })'
