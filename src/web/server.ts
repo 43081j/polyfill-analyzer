@@ -584,7 +584,7 @@ const UI_HTML = `<!DOCTYPE html>
         <div class="filter-bar">
           <button class="pill-btn" onclick="filterBundles('all')">All Bundles</button>
           <button class="pill-btn" onclick="filterBundles('polyfills')">With Polyfills Only</button>
-          <button class="pill-btn" onclick="filterBundles('high')">Obsolete (Baseline High)</button>
+          <button class="pill-btn" onclick="filterBundles('high')">Obsolete (Baseline Widely available)</button>
         </div>
       </div>
       <div id="bundles-list"></div>
@@ -718,7 +718,7 @@ const UI_HTML = `<!DOCTYPE html>
           <div class="kpi-sub">Across \${s.uniqueFeaturesPolyfilled} distinct ES features</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Redundant (Baseline High)</div>
+          <div class="kpi-label">Redundant (Baseline Widely available)</div>
           <div class="kpi-value" style="color: \${s.redundantPercentage > 50 ? '#fca5a5' : '#86efac'}">\${s.redundantPercentage}%</div>
           <div class="kpi-sub">\${s.redundantPolyfillCount} of \${s.totalPolyfillInstances} natively supported</div>
         </div>
@@ -743,7 +743,7 @@ const UI_HTML = `<!DOCTYPE html>
           <tr>
             <td><strong>\${escapeHtml(d.featureName)}</strong> (<code>\${d.featureId}</code>)</td>
             <td>\${d.baselineYear || 'N/A'}</td>
-            <td><span class="badge badge-\${d.status}-status">Baseline \${d.status.toUpperCase()}</span></td>
+            <td><span class="badge badge-\${d.status}-status">\${formatBaselineStatus(d.status)}</span></td>
             <td>\${d.occurrences.map(o => \`<code>\${escapeHtml(o.bundleName)}</code> (offset \${o.offset ?? '?'})\`).join(' &bull; ')}</td>
           </tr>
         \`).join('');
@@ -753,6 +753,12 @@ const UI_HTML = `<!DOCTYPE html>
 
       // 4. Render Bundles
       renderBundlesList();
+    }
+
+    function formatBaselineStatus(status) {
+      if (status === 'high') return 'Baseline Widely available';
+      if (status === 'low') return 'Baseline Newly available';
+      return 'Limited availability';
     }
 
     function filterBundles(mode) {
@@ -792,7 +798,7 @@ const UI_HTML = `<!DOCTYPE html>
               <tr>
                 <td><strong>\${escapeHtml(d.name)}</strong><br><code style="font-size:0.75rem; color:var(--text-muted)">\${d.id}</code></td>
                 <td>\${d.baselineYear ?? 'N/A'}</td>
-                <td><span class="badge badge-\${d.baselineStatus}-status">\${d.baselineStatus.toUpperCase()}</span></td>
+                <td><span class="badge badge-\${d.baselineStatus}-status">\${formatBaselineStatus(d.baselineStatus)}</span></td>
                 <td>Line \${loc.line ?? 1}, Col \${loc.column ?? '?'}<br><span style="font-size:0.75rem; color:var(--text-muted)">Offset: \${loc.byteOffset ?? 'N/A'}</span></td>
                 <td>
                   <code class="code-snippet">\${escapeHtml(loc.snippet || '')}</code>

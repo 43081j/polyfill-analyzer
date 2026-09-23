@@ -92,15 +92,15 @@ Highlight these 4 specific architectural findings right at the top of your summa
   If the site's main/app bundles use modern native syntax (e.g., native `async/await` [ES2017+] or native `class` [ES2015+]), explain that any browser older than that syntax floor will fail with a `SyntaxError` before running the app. Therefore, shipping ES2015–ES2017 polyfills (`Promise`, `Object.assign`, `Array.prototype.includes`, `Object.entries`) is **100% unreachable dead weight**.
 - **⚠️ Duplicate Polyfills Across Bundles (`HIGH`)**:
   Point out every feature that is polyfilled more than once across separate bundles (for example, when Next.js/Webpack ships `core-js` in `polyfills-*.js` AND re-defines `Array.prototype.at`, `Object.hasOwn`, or `Array.prototype.flat` inline in `main-*.js`).
-- **⚠️ Obsolete `Baseline High` Polyfills (`HIGH`)**:
-  List the percentage and count of detected polyfills that are **Baseline Widely Available** (natively supported across Chrome, Edge, Firefox, and Safari for 30+ months) and recommend updating `browserslist` to:
+- **⚠️ Obsolete `Baseline Widely available` Polyfills (`HIGH`)**:
+  List the percentage and count of detected polyfills that are **Baseline Widely available** (natively supported across Chrome, Edge, Firefox, and Safari for 30+ months, dynamically resolved from `web-features`) and recommend updating `browserslist` to:
   ```json
   "browserslist": [
     "baseline widely available",
     "defaults and fully supports es6-module"
   ]
   ```
-- **ℹ️ Modern `Baseline Low` Polyfills Worth Retaining (`INFO`)**:
+- **ℹ️ Modern `Baseline Newly available` Polyfills Worth Retaining (`INFO`)**:
   Identify any newly available features (Baseline 2024–2025, such as `Promise.withResolvers`, `Set.prototype.intersection`, or `Promise.try`) where retaining a targeted polyfill is still beneficial.
 
 ### 2. 📦 Bundle-by-Bundle Breakdown & 1:1 AST Snippets

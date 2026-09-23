@@ -58,7 +58,7 @@ export function generateRecommendations(detected: RuleEntry[]): {
 
   if (allHigh) {
     return {
-      modernizationSuggestion: 'Obsolete polyfills detected. All detected features are widely supported in Baseline "high" browsers. Remove these polyfills to optimize bundle size and performance.',
+      modernizationSuggestion: 'Obsolete polyfills detected. All detected features are natively supported in Baseline Widely available browsers. Remove these polyfills to optimize bundle size and performance.',
       recommendations: [
         'Remove obsolete polyfills that are natively supported across all major browsers.',
         ...deduplicatedSuggestions

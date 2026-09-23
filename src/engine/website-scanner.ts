@@ -175,7 +175,7 @@ export function analyzeBundles(
   const allDetected = bundles.flatMap((b) => b.detectedPolyfills);
   const inferredPolyfillFloorYear = inferBaselineYear(allDetected);
 
-  // Count redundant polyfills (Baseline High or older than site native syntax floor)
+  // Count redundant polyfills (Baseline Widely available or older than site native syntax floor)
   const redundantInstances = allDetected.filter(
     (d) =>
       d.baselineStatus === 'high' ||
@@ -222,7 +222,7 @@ export function analyzeBundles(
       priority: 'CRITICAL',
       title: `Syntax vs. Polyfill Target Mismatch (App uses ES${siteNativeSyntaxFloorYear}+ syntax, ships ES${inferredPolyfillFloorYear} polyfills)`,
       description: `Your application bundles (${bundlesWithNativeModern.slice(0, 3).join(', ')}) contain un-transpiled native ES${siteNativeSyntaxFloorYear}+ syntax (such as native async/await or ES6 classes). Any legacy browser older than ${siteNativeSyntaxFloorYear} will fail with a SyntaxError when parsing your application bundles, making all ES${inferredPolyfillFloorYear}–ES${siteNativeSyntaxFloorYear} polyfills 100% unreachable dead weight.`,
-      actionItem: `Update your bundler/Babel/SWC target and browserslist to align with your minimum syntax floor (at least Baseline ${siteNativeSyntaxFloorYear} or Baseline Widely Available) to stop injecting unreachable legacy polyfills.`,
+      actionItem: `Update your bundler/Babel/SWC target and browserslist to align with your minimum syntax floor (at least Baseline ${siteNativeSyntaxFloorYear} or Baseline Widely available) to stop injecting unreachable legacy polyfills.`,
       affectedBundles: bundles.filter((b) => b.detectedPolyfills.length > 0).map((b) => b.fileName),
       affectedFeatures: legacyFeatures,
     });
@@ -245,7 +245,7 @@ export function analyzeBundles(
     });
   }
 
-  // 3. Baseline High / Obsolete Polyfills Recommendation
+  // 3. Baseline Widely available / Obsolete Polyfills Recommendation
   if (redundantPolyfillCount > 0) {
     const obsoleteFeatures = Array.from(featureOccurrences.values())
       .filter((f) => f.status === 'high')
@@ -258,20 +258,20 @@ export function analyzeBundles(
 
     highLevelRecommendations.push({
       priority: 'HIGH',
-      title: `Remove ${obsoleteFeatures.length} Obsolete 'Baseline High' Polyfills (${redundantPercentage}% of all detected polyfills)`,
-      description: `${redundantPolyfillCount} of the ${totalPolyfillInstances} detected polyfill instances cover features that are Baseline Widely Available (supported natively by Chrome, Edge, Firefox, and Safari for 30+ months). Bundles containing these polyfills total ${totalPolyfillBundleKB} KB.`,
-      actionItem: `Set your browserslist query to "baseline widely available" or "defaults and fully supports es6-module" to drop unnecessary ES2015–ES2022 shims.`,
+      title: `Remove ${obsoleteFeatures.length} Obsolete 'Baseline Widely available' Polyfills (${redundantPercentage}% of all detected polyfills)`,
+      description: `${redundantPolyfillCount} of the ${totalPolyfillInstances} detected polyfill instances cover features that are Baseline Widely available (supported natively by Chrome, Edge, Firefox, and Safari for 30+ months). Bundles containing these polyfills total ${totalPolyfillBundleKB} KB.`,
+      actionItem: `Set your browserslist query to "baseline widely available" or "defaults and fully supports es6-module" to drop unnecessary ES2015–ES2023 shims.`,
       affectedBundles: polyfillBundles.map((b) => b.fileName),
       affectedFeatures: obsoleteFeatures,
     });
   }
 
-  // 4. Modern Baseline Low Polyfills (Keep / Informative)
+  // 4. Modern Baseline Newly available Polyfills (Keep / Informative)
   const modernLowFeatures = Array.from(featureOccurrences.values()).filter((f) => f.status === 'low');
   if (modernLowFeatures.length > 0) {
     highLevelRecommendations.push({
       priority: 'INFO',
-      title: `Retain ${modernLowFeatures.length} Modern Polyfills (Baseline 2024–2025 Newly Available)`,
+      title: `Retain ${modernLowFeatures.length} Modern Polyfills (Baseline 2024–2025 Newly available)`,
       description: `Features such as ${modernLowFeatures.map((f) => `${f.featureName} (${f.baselineYear})`).join(', ')} reached Baseline recently (2024–2025). Retaining targeted polyfills for these specific features ensures safe adoption across users on slightly older browser versions.`,
       actionItem: `Keep only selective polyfills for post-2023 ECMAScript additions while removing pre-2023 shims.`,
       affectedBundles: bundles
@@ -447,7 +447,7 @@ export function formatWebsiteMarkdownReport(report: WebsiteScanReport): string {
   lines.push('| :--- | :--- |');
   lines.push(`| **Bundles Analyzed** | **${s.totalBundlesScanned}** of ${s.totalScriptsDiscovered} discovered scripts (${(s.totalBytesScanned / 1024).toFixed(1)} KB total) |`);
   lines.push(`| **Polyfill Instances Detected** | **${s.totalPolyfillInstances}** instances across **${s.uniqueFeaturesPolyfilled}** distinct ECMAScript features |`);
-  lines.push(`| **Redundant Polyfills (Baseline High)** | **${s.redundantPolyfillCount} / ${s.totalPolyfillInstances} (${s.redundantPercentage}%)** are widely available natively |`);
+  lines.push(`| **Redundant Polyfills (Baseline Widely available)** | **${s.redundantPolyfillCount} / ${s.totalPolyfillInstances} (${s.redundantPercentage}%)** are widely available natively |`);
   lines.push(`| **Duplicate Polyfills Across Chunks** | **${s.duplicateFeatureCount}** features polyfilled in multiple separate bundles |`);
   lines.push(`| **Site Minimum Native Syntax Floor** | **ES${s.siteNativeSyntaxFloorYear}** (inferred from native \`async/await\` & \`class\` usage) |`);
   lines.push(`| **Oldest Polyfill Shipped** | **${s.inferredPolyfillFloorYear ? `Baseline ${s.inferredPolyfillFloorYear}` : 'None'}** |`);
@@ -510,8 +510,14 @@ export function formatWebsiteMarkdownReport(report: WebsiteScanReport): string {
     for (const d of b.detectedPolyfills) {
       const snippet = (d.mapping?.minifiedPolyfill?.snippet || '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
       const offset = d.mapping?.minifiedPolyfill?.byteOffset ?? 'N/A';
+      const statusLabel =
+        d.baselineStatus === 'high'
+          ? 'Baseline Widely available'
+          : d.baselineStatus === 'low'
+            ? 'Baseline Newly available'
+            : 'Limited availability';
       lines.push(
-        `| \`${d.id}\` | **${d.name}** | ${d.baselineYear ?? 'N/A'} | \`${d.baselineStatus.toUpperCase()}\` | \`${offset}\` | \`${snippet}\` |`
+        `| \`${d.id}\` | **${d.name}** | ${d.baselineYear ?? 'N/A'} | \`${statusLabel}\` | \`${offset}\` | \`${snippet}\` |`
       );
     }
     lines.push('');

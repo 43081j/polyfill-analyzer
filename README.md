@@ -11,7 +11,7 @@ An AST-driven JavaScript bundle analyzer powered by `@ast-grep/napi` that determ
 2. **High-Level Executive Recommendations Right at the Top**:
    - **🚨 Syntax vs. Polyfill Target Mismatch**: Automatically detects when an app ships modern native syntax (like native `async/await` [ES2017+] or ES6 `class` declarations) while still bundling unreachable legacy ES2015–ES2017 polyfills.
    - **⚠️ Cross-Bundle Duplicate Polyfill Detection**: Identifies when multiple chunks (e.g. Next.js `polyfills-*.js` and `main-*.js`) ship duplicate shims for the same feature.
-   - **⚠️ Obsolete `Baseline High` Polyfills**: Calculates the exact percentage of polyfills that are natively supported across all major browsers (`Baseline Widely Available`) and recommends a modernized `browserslist` config.
+   - **⚠️ Obsolete `Baseline Widely available` Polyfills**: Calculates the exact percentage of polyfills that are natively supported across all major browsers (`Baseline Widely available`, dynamically resolved via `web-features`) and recommends a modernized `browserslist` config.
 3. **1:1 SourceMap Decoder (Zero External Dependencies)**:
    Includes a built-in Base64 VLQ SourceMap v3 decoder that links minified polyfill definitions and call sites directly back to the preceding source file, line, and column.
 4. **Interactive Web UI & REST API**:

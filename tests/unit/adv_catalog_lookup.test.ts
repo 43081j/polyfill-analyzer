@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getRuleByWebFeatureId, getRuleByBcdId, getAllRules, loadCatalog, clearCatalogCache } from '../../src/catalog/index.js';
+import { getRuleByWebFeatureId, getRuleByBcdId, getAllRules, loadCatalog, clearCatalogCache, resolveDynamicBaseline } from '../../src/catalog/index.js';
 import path from 'node:path';
 
 describe('Adversarial Test Suite: R2 Catalog Lookup API Coverage Gaps (Phase 4)', () => {
@@ -34,5 +34,24 @@ describe('Adversarial Test Suite: R2 Catalog Lookup API Coverage Gaps (Phase 4)'
     const relRules = getAllRules(relPath);
     expect(relRules.length).toBe(allRules.length);
     expect(relRules).toEqual(allRules);
+  });
+
+  it('adv_dynamic_web_features_hydration: dynamically updates baselineStatus and baselineYear from web-features at runtime', () => {
+    clearCatalogCache();
+    const rules = getAllRules();
+    const arrayByCopy = rules.find(r => r.id === 'array-change-by-copy');
+    expect(arrayByCopy).toBeDefined();
+    expect(arrayByCopy?.baselineStatus).toBe('high');
+    expect(arrayByCopy?.baselineYear).toBe(2023);
+
+    // Verify that resolveDynamicBaseline overrides stale static values using web-features
+    const staleEntry = {
+      ...arrayByCopy!,
+      baselineStatus: 'low' as const,
+      baselineYear: 1999
+    };
+    const resolved = resolveDynamicBaseline(staleEntry);
+    expect(resolved.baselineStatus).toBe('high');
+    expect(resolved.baselineYear).toBe(2023);
   });
 });
