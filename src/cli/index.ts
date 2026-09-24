@@ -11,6 +11,8 @@ import {
   formatTableReport,
   scanWebsiteUrl,
   formatWebsiteMarkdownReport,
+  formatWebsiteHtmlReport,
+  analyzeBundles,
   evaluateBaselineTarget,
 } from '../engine/index.js';
 import { loadCatalog } from '../catalog/index.js';
@@ -26,7 +28,9 @@ Usage: polyfill-analyzer <file> [options]
   polyfill-analyzer serve [--port 3000]           Start interactive Web UI dashboard & REST API
 
 Options:
-  -f, --format <table|json|markdown>           Output format (default: table for file, markdown for URL)
+  -f, --format <table|json|markdown|html>      Output format (default: table for file, markdown for URL)
+  --html                                       Generate a standalone interactive HTML report (same UI as Web dashboard)
+  -o, --output <path>                          Write output report to a local file (e.g. report.html, default: polyfill-report.html in html mode)
   -j, --json                                   Output raw JSON report
   -c, --catalog <path>                         Custom catalog rules JSON path
   --target-year <YYYY>                         Set Baseline target year (2015 to current year; warns on features unavailable by YYYY-12-31)
@@ -42,6 +46,8 @@ export function runCli(argv = process.argv.slice(2)): void {
       args: argv,
       options: {
         json: { type: 'boolean', short: 'j' },
+        html: { type: 'boolean' },
+        output: { type: 'string', short: 'o' },
         catalog: { type: 'string', short: 'c' },
         format: { type: 'string', short: 'f' },
         'target-year': { type: 'string' },
@@ -64,8 +70,19 @@ export function runCli(argv = process.argv.slice(2)): void {
       return;
     }
 
-    if (values.format && values.format !== 'json' && values.format !== 'table' && values.format !== 'markdown') {
-      console.error(`Error: Unsupported format value "${values.format}"`);
+    const effectiveFormat =
+      values.format ||
+      (values.html ? 'html' : undefined) ||
+      (typeof values.output === 'string' && values.output.endsWith('.html') ? 'html' : undefined);
+
+    if (
+      effectiveFormat &&
+      effectiveFormat !== 'json' &&
+      effectiveFormat !== 'table' &&
+      effectiveFormat !== 'markdown' &&
+      effectiveFormat !== 'html'
+    ) {
+      console.error(`Error: Unsupported format value "${effectiveFormat}"`);
       process.exit(1);
     }
 
@@ -106,10 +123,33 @@ export function runCli(argv = process.argv.slice(2)): void {
       const maxBundles = values['max-bundles'] ? parseInt(values['max-bundles'], 10) : 20;
       scanWebsiteUrl(targetUrl, { maxBundles, targetYear, widelyAvailableOnDate })
         .then((report) => {
-          if (values.json || values.format === 'json') {
-            console.log(JSON.stringify(report, null, 2));
+          if (values.json || effectiveFormat === 'json') {
+            const jsonStr = JSON.stringify(report, null, 2);
+            if (typeof values.output === 'string') {
+              const outPath = path.resolve(process.cwd(), values.output);
+              fs.writeFileSync(outPath, jsonStr, 'utf8');
+            }
+            console.log(jsonStr);
+          } else if (effectiveFormat === 'html') {
+            const html = formatWebsiteHtmlReport(report);
+            const outPath = path.resolve(
+              process.cwd(),
+              typeof values.output === 'string' ? values.output : 'polyfill-report.html'
+            );
+            fs.writeFileSync(outPath, html, 'utf8');
+            if (typeof values.output === 'string') {
+              console.log(`Saved HTML report to ${outPath}`);
+            } else {
+              console.error(`Saved HTML report to ${outPath}`);
+              console.log(html);
+            }
           } else {
-            console.log(formatWebsiteMarkdownReport(report));
+            const md = formatWebsiteMarkdownReport(report);
+            if (typeof values.output === 'string') {
+              const outPath = path.resolve(process.cwd(), values.output);
+              fs.writeFileSync(outPath, md, 'utf8');
+            }
+            console.log(md);
           }
         })
         .catch((err: any) => {
@@ -173,19 +213,82 @@ export function runCli(argv = process.argv.slice(2)): void {
       widelyAvailableOnDate,
     });
 
-    if (values.json || values.format === 'json') {
-      const report = {
-        filePath,
-        baselineStatus: status,
-        inferredBaselineYear: year,
-        baselineTarget,
+    if (values.json || effectiveFormat === 'json') {
+      const output = {
+        bundlePath: filePath,
+        file: filePath,
+        target: filePath,
+        detectedFeatures: sorted,
         detectedPolyfills: sorted,
+        inferredBaseline: {
+          status,
+          year,
+          suggestion: modernizationSuggestion,
+          recommendations,
+        },
+        baselineTarget,
         modernizationSuggestion,
         recommendations,
+        baselineStatus: status,
+        baselineYear: year,
       };
-      console.log(JSON.stringify(report, null, 2));
+      const jsonStr = JSON.stringify(output, null, 2);
+      if (typeof values.output === 'string') {
+        const outPath = path.resolve(process.cwd(), values.output);
+        fs.writeFileSync(outPath, jsonStr, 'utf8');
+      }
+      console.log(jsonStr);
+    } else if (effectiveFormat === 'html') {
+      const code = fs.readFileSync(filePath, 'utf8');
+      const mapPath = `${filePath}.map`;
+      const sourceMapJson = fs.existsSync(mapPath) ? fs.readFileSync(mapPath, 'utf8') : undefined;
+      const report = analyzeBundles(
+        filePath,
+        1,
+        [{ url: filePath, fileName: path.basename(filePath), code, sourceMapJson }],
+        { targetYear, widelyAvailableOnDate }
+      );
+      const html = formatWebsiteHtmlReport(report);
+      const outPath = path.resolve(
+        process.cwd(),
+        typeof values.output === 'string' ? values.output : 'polyfill-report.html'
+      );
+      fs.writeFileSync(outPath, html, 'utf8');
+      if (typeof values.output === 'string') {
+        console.log(`Saved HTML report to ${outPath}`);
+      } else {
+        console.error(`Saved HTML report to ${outPath}`);
+        console.log(html);
+      }
+    } else if (effectiveFormat === 'markdown') {
+      const code = fs.readFileSync(filePath, 'utf8');
+      const report = analyzeBundles(
+        filePath,
+        1,
+        [{ url: filePath, fileName: path.basename(filePath), code }],
+        { targetYear, widelyAvailableOnDate }
+      );
+      const md = formatWebsiteMarkdownReport(report);
+      if (typeof values.output === 'string') {
+        const outPath = path.resolve(process.cwd(), values.output);
+        fs.writeFileSync(outPath, md, 'utf8');
+      }
+      console.log(md);
     } else {
-      console.log(formatTableReport(filePath, sorted, status, year, modernizationSuggestion, recommendations, baselineTarget));
+      const tbl = formatTableReport(
+        filePath,
+        sorted,
+        status,
+        year,
+        modernizationSuggestion,
+        recommendations,
+        baselineTarget
+      );
+      if (typeof values.output === 'string') {
+        const outPath = path.resolve(process.cwd(), values.output);
+        fs.writeFileSync(outPath, tbl, 'utf8');
+      }
+      console.log(tbl);
     }
   } catch (err: any) {
     console.error('Fatal error:', err.message);

@@ -44,6 +44,10 @@ When the user asks you to check a website (e.g., `https://www.example.com/` or a
    npx polyfill-analyzer url "https://www.example.com/" --max-bundles 20 --format markdown
    ```
    *(Or run directly from the repository root via `node dist/cli/index.js url "https://www.example.com/" --max-bundles 20 --format markdown`.)*
+   - To generate a **standalone local HTML report** (identical to the interactive Web UI), pass `--format html -o report.html` (or `--html`).
+   - To warn against a custom **Baseline Target** (matching `baseline-browser-mapping` CLI options):
+     - `--target-year <YYYY>`: warn on features not available across all core browsers by the end of `YYYY` (`YYYY-12-31`).
+     - `--widely-available-on-date <YYYY-MM-DD>`: warn on features whose `baseline_low_date` is after `YYYY-MM-DD` minus 30 months.
    - To get raw structured JSON instead of Markdown, pass `--json`.
 
 2. **How It Works Under the Hood**:
@@ -64,6 +68,8 @@ When the user asks you to check a local `.js` or `.mjs` bundle file:
    npx polyfill-analyzer "/path/to/bundle.min.js" --format markdown
    ```
    - For tabular terminal output: omit `--format markdown` (defaults to `table`).
+   - For a standalone interactive HTML file: pass `--format html -o report.html` (defaults to `./polyfill-report.html`).
+   - For custom Baseline target warnings: pass `--target-year <YYYY>` or `--widely-available-on-date <YYYY-MM-DD>`.
    - For JSON output: add `--json`.
    - If a `.map` file exists alongside the bundle (e.g., `bundle.min.js.map`) or via `//# sourceMappingURL=`, the tool automatically performs **1:1 Base64 VLQ SourceMap decoding**, linking each minified AST match back to the exact original source file and line!
 

@@ -1032,3 +1032,532 @@ export function formatWebsiteMarkdownReport(report: WebsiteScanReport): string {
 
   return lines.join('\n');
 }
+
+function escapeHtmlStr(str: string): string {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatBaselineBadgeLabel(status: string): string {
+  if (status === 'high') return 'Baseline Widely available';
+  if (status === 'low') return 'Baseline Newly available';
+  return 'Limited availability';
+}
+
+export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
+  const s = report.summary;
+  const bt = report.baselineTarget;
+  const targetShortName = bt?.shortTargetName || 'Baseline Widely available';
+  const supportedByTargetIds = new Set(
+    (bt?.supportedByTargetFeatures || []).map((r) => r.id)
+  );
+  const coreBrowsers = bt?.compatibleBrowsers
+    ? bt.compatibleBrowsers
+        .filter((b) => ['chrome', 'edge', 'firefox', 'safari'].includes(b.browser))
+        .map((b) => `${b.browser} ${b.version}+`)
+        .join(', ')
+    : '';
+
+  const recCardsHtml = report.highLevelRecommendations
+    .map((rec) => {
+      const icon =
+        rec.priority === 'CRITICAL'
+          ? '🚨'
+          : rec.priority === 'HIGH'
+            ? '⚠️'
+            : rec.priority === 'MEDIUM'
+              ? '💡'
+              : 'ℹ️';
+      const featChips = (rec.affectedFeatures || [])
+        .map((f) => `<span class="chip">${escapeHtmlStr(f)}</span>`)
+        .join('');
+      const bundleChips = (rec.affectedBundles || [])
+        .map(
+          (b) =>
+            `<span class="chip" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe;">📦 ${escapeHtmlStr(b)}</span>`
+        )
+        .join('');
+      return `
+      <div class="rec-card ${rec.priority}">
+        <div class="rec-header">
+          <span class="badge badge-${rec.priority}">${icon} ${rec.priority}</span>
+          <span class="rec-title">${escapeHtmlStr(rec.title)}</span>
+        </div>
+        <div class="rec-desc">${escapeHtmlStr(rec.description)}</div>
+        <div class="rec-action">
+          <strong>✅ Action Item:</strong> ${escapeHtmlStr(rec.actionItem)}
+        </div>
+        ${featChips || bundleChips ? `<div class="chip-list">${featChips}${bundleChips}</div>` : ''}
+      </div>`;
+    })
+    .join('\n');
+
+  const dupRowsHtml = (report.duplicatePolyfills || [])
+    .map(
+      (d) => `
+      <tr>
+        <td><strong>${escapeHtmlStr(d.featureName)}</strong> (<code>${escapeHtmlStr(d.featureId)}</code>)</td>
+        <td>${d.baselineYear ?? 'N/A'}</td>
+        <td><span class="badge badge-${d.status}-status">${formatBaselineBadgeLabel(d.status)}</span></td>
+        <td>${d.occurrences
+          .map(
+            (o) => `<code>${escapeHtmlStr(o.bundleName)}</code> (offset ${o.offset ?? '?'})`
+          )
+          .join(' &bull; ')}</td>
+      </tr>`
+    )
+    .join('\n');
+
+  const bundleCardsHtml = report.bundles
+    .map((b) => {
+      const kb = (b.sizeBytes / 1024).toFixed(1);
+      const savedKb = ((b.estimatedSavingsBytes ?? 0) / 1024).toFixed(1);
+      const postKb = ((b.estimatedPostRemovalBytes ?? b.sizeBytes) / 1024).toFixed(1);
+      const pct = b.estimatedSavingsPercentage ?? 0;
+
+      const statusBadge =
+        b.detectedPolyfills.length === 0
+          ? '<span class="badge" style="background: rgba(34,197,94,0.2); color: #86efac;">✅ CLEAN (0 Polyfills)</span>'
+          : `<span class="badge badge-HIGH">${b.detectedPolyfills.length} Polyfills Detected</span>`;
+
+      const savingsBadge =
+        b.detectedPolyfills.length > 0 && (b.estimatedSavingsBytes ?? 0) > 0
+          ? `<span>Est. After Removal: <strong style="color: #86efac;">~${postKb} KB</strong></span>
+             <span class="badge badge-high-status">💾 Save ~${savedKb} KB (-${pct}%)</span>`
+          : '';
+
+      let tableHtml = '';
+      if (b.detectedPolyfills.length > 0) {
+        const rows = b.detectedPolyfills
+          .map((d) => {
+            const loc = d.mapping?.minifiedPolyfill || ({} as any);
+            const origList = d.mapping?.precedingSource || [];
+            const origHtml =
+              origList.length > 0
+                ? origList
+                    .map(
+                      (o) =>
+                        `<div style="margin-top:0.3rem; font-size:0.75rem; color:#86efac;">↳ Source Map: <code>${escapeHtmlStr(o.sourceFile)}:${o.line}</code></div>`
+                    )
+                    .join('')
+                : '';
+
+            const isObsolete =
+              bt && bt.mode !== 'default'
+                ? supportedByTargetIds.has(d.id)
+                : d.baselineStatus === 'high';
+
+            const estFeatureKb = ((d.estimatedSizeBytes ?? 1800) / 1024).toFixed(1);
+
+            const targetVerdictHtml =
+              bt && bt.mode !== 'default'
+                ? isObsolete
+                  ? `<div style="margin-bottom:0.3rem;"><span class="badge badge-high-status">✅ Obsolete in ${escapeHtmlStr(targetShortName)}</span></div>`
+                  : `<div style="margin-bottom:0.3rem;"><span class="badge badge-low-status">⚠️ Exceeds ${escapeHtmlStr(targetShortName)} (${escapeHtmlStr(d.baselineLowDate ?? String(d.baselineYear ?? 'N/A'))})</span></div>`
+                : '';
+
+            return `
+              <tr>
+                <td><strong>${escapeHtmlStr(d.name)}</strong><br><code style="font-size:0.75rem; color:var(--text-muted)">${escapeHtmlStr(d.id)}</code></td>
+                <td>${d.baselineYear ?? 'N/A'}</td>
+                <td>
+                  <strong>~${estFeatureKb} KB</strong><br>
+                  <span style="font-size:0.73rem; color:${isObsolete ? '#86efac' : '#fde047'}">${isObsolete ? '🗑️ Save if removed' : '📌 Retained for target'}</span>
+                </td>
+                <td>
+                  ${targetVerdictHtml}
+                  <span class="badge badge-${d.baselineStatus}-status" style="${bt && bt.mode !== 'default' ? 'opacity:0.82;' : ''}">${formatBaselineBadgeLabel(d.baselineStatus)}</span>
+                </td>
+                <td>Line ${loc.line ?? 1}, Col ${loc.column ?? '?'}<br><span style="font-size:0.75rem; color:var(--text-muted)">Offset: ${loc.byteOffset ?? 'N/A'}</span></td>
+                <td>
+                  <code class="code-snippet">${escapeHtmlStr(loc.snippet || '')}</code>
+                  ${origHtml}
+                </td>
+              </tr>`;
+          })
+          .join('\n');
+
+        tableHtml = `
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Baseline Year</th>
+                <th>Est. Size</th>
+                <th>Status</th>
+                <th>Minified AST Location</th>
+                <th>1:1 Production AST Match Snippet</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+
+      const hasObsoleteForTarget = b.detectedPolyfills.some((d) =>
+        bt && bt.mode !== 'default'
+          ? supportedByTargetIds.has(d.id)
+          : d.baselineStatus === 'high'
+      );
+      return `
+      <div class="bundle-card" data-has-polyfills="${b.detectedPolyfills.length > 0}" data-has-high="${hasObsoleteForTarget}">
+        <div class="bundle-header">
+          <div>
+            <div class="bundle-title">📄 ${escapeHtmlStr(b.fileName)}</div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem; word-break: break-all;">${escapeHtmlStr(b.url)}</div>
+          </div>
+          <div class="bundle-meta">
+            <span>Size: <strong>${kb} KB</strong></span>
+            ${savingsBadge}
+            <span>Newest Un-Polyfilled: <strong>${escapeHtmlStr(b.nativeSyntaxStats.mostModernFeatureName || 'ES' + b.nativeSyntaxStats.inferredSyntaxFloorYear)}</strong>${b.nativeSyntaxStats.mostModernFeatureBaselineDate ? ' (' + escapeHtmlStr(b.nativeSyntaxStats.mostModernFeatureBaselineDate) + ')' : ''}</span>
+            ${statusBadge}
+          </div>
+        </div>
+        ${tableHtml}
+      </div>`;
+    })
+    .join('\n');
+
+  const safeJson = JSON.stringify(report).replace(/<\//g, '<\\/');
+  const safeMarkdown = JSON.stringify(formatWebsiteMarkdownReport(report)).replace(/<\//g, '<\\/');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polyfill &amp; Transform Analysis Report — ${escapeHtmlStr(report.targetUrl)}</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --border: rgba(148, 163, 184, 0.16);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --accent: #a855f7;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #22c55e;
+      --info: #3b82f6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg-dark) 45%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand { display: flex; align-items: center; gap: 0.85rem; }
+    .brand-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800; color: #fff;
+      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.45);
+    }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .brand p { font-size: 0.8rem; color: var(--text-muted); }
+    main { max-width: 1440px; margin: 0 auto; padding: 2rem; }
+    .btn {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff; border: none; border-radius: 10px;
+      padding: 0.65rem 1.15rem; font-weight: 600; font-size: 0.85rem;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem;
+    }
+    .btn-secondary {
+      background: rgba(51, 65, 85, 0.7);
+      border: 1px solid var(--border);
+    }
+    .pill-btn {
+      background: rgba(51, 65, 85, 0.55);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .pill-btn:hover, .pill-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .section-header h2 { font-size: 1.25rem; font-weight: 700; }
+    .recommendations-list {
+      display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.25rem;
+    }
+    .rec-card {
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 14px;
+      padding: 1.35rem 1.5rem;
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--info);
+    }
+    .rec-card.CRITICAL { border-left-color: var(--danger); background: linear-gradient(90deg, rgba(239,68,68,0.09) 0%, rgba(30,41,59,0.85) 35%); }
+    .rec-card.HIGH { border-left-color: var(--warning); background: linear-gradient(90deg, rgba(245,158,11,0.09) 0%, rgba(30,41,59,0.85) 35%); }
+    .rec-card.INFO { border-left-color: var(--primary); }
+    .rec-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.55rem; flex-wrap: wrap; }
+    .badge {
+      font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.55rem;
+      border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-CRITICAL { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-HIGH { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-INFO { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-high-status { background: rgba(34, 197, 94, 0.18); color: #86efac; }
+    .badge-low-status { background: rgba(245, 158, 11, 0.18); color: #fde047; }
+    .badge-false-status { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+    .rec-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .rec-desc { color: #cbd5e1; font-size: 0.92rem; margin-bottom: 0.75rem; }
+    .rec-action {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-size: 0.88rem;
+      color: #e0f2fe;
+      margin-bottom: 0.65rem;
+    }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .chip {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.74rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      padding: 0.18rem 0.5rem;
+      border-radius: 5px;
+      color: #93c5fd;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.25rem;
+    }
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem 1.35rem;
+    }
+    .kpi-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .kpi-value { font-size: 1.85rem; font-weight: 800; margin-top: 0.25rem; color: #fff; }
+    .kpi-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .bundle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .bundle-header {
+      padding: 1rem 1.35rem;
+      background: rgba(15, 23, 42, 0.5);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .bundle-title { font-family: monospace; font-size: 0.95rem; font-weight: 700; color: #38bdf8; }
+    .bundle-meta { display: flex; gap: 0.85rem; align-items: center; font-size: 0.82rem; color: var(--text-muted); flex-wrap: wrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.35);
+    }
+    code.code-snippet {
+      display: block;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.78rem;
+      background: #090d16;
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      color: #e2e8f0;
+      overflow-x: auto;
+      max-width: 560px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .filter-bar { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1>Polyfill &amp; Transform Analyzer Report</h1>
+        <p>Target: <code>${escapeHtmlStr(report.targetUrl)}</code> &bull; Scanned at ${escapeHtmlStr(report.scannedAt)}</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 0.6rem;">
+      <button class="btn btn-secondary" onclick="downloadMarkdownReport()">⬇️ Export Markdown</button>
+      <button class="btn btn-secondary" onclick="downloadJsonReport()">⬇️ Export JSON</button>
+    </div>
+  </header>
+
+  <main>
+    ${
+      bt
+        ? `<div class="bundle-card" style="padding: 1rem 1.35rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent);">
+            <div style="font-size: 0.9rem; font-weight: 700; color: #fff;">🎯 Configured Baseline Target: ${escapeHtmlStr(bt.targetLabel)}</div>
+            ${
+              coreBrowsers
+                ? `<div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">Compatible Core Browsers (via <code>baseline-browser-mapping</code>): <code>${escapeHtmlStr(coreBrowsers)}</code></div>`
+                : ''
+            }
+          </div>`
+        : ''
+    }
+
+    <div class="section-header">
+      <h2>🎯 High-Level Executive Recommendations (What You Need To Do)</h2>
+    </div>
+    <div id="recommendations-list" class="recommendations-list">
+      ${recCardsHtml}
+    </div>
+
+    <div id="kpi-grid" class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Bundles Scanned</div>
+        <div class="kpi-value">${s.totalBundlesScanned} <span style="font-size:1rem; color:var(--text-muted)">/ ${s.totalScriptsDiscovered}</span></div>
+        <div class="kpi-sub">${(s.totalBytesScanned / 1024).toFixed(1)} KB total JS analyzed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Polyfills Detected</div>
+        <div class="kpi-value">${s.totalPolyfillInstances}</div>
+        <div class="kpi-sub">Across ${s.uniqueFeaturesPolyfilled} distinct ES features</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Redundant (${escapeHtmlStr(targetShortName)})</div>
+        <div class="kpi-value" style="color: ${s.redundantPercentage > 50 ? '#fca5a5' : '#86efac'}">${s.redundantPercentage}%</div>
+        <div class="kpi-sub">${s.redundantPolyfillCount} of ${s.totalPolyfillInstances} natively in ${escapeHtmlStr(targetShortName)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Estimated Size Savings</div>
+        <div class="kpi-value" style="color: #38bdf8">-${((s.estimatedTotalSavingsBytes || 0) / 1024).toFixed(1)} KB</div>
+        <div class="kpi-sub">${((s.polyfillsBundleTotalBytes || 0) / 1024).toFixed(1)} KB &rarr; ~${((s.estimatedPostRemovalPolyfillBundleBytes || 0) / 1024).toFixed(1)} KB (-${s.estimatedPolyfillBundleSavingsPercentage || 0}%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Duplicate Polyfills</div>
+        <div class="kpi-value" style="color: ${s.duplicateFeatureCount > 0 ? '#fcd34d' : '#86efac'}">${s.duplicateFeatureCount}</div>
+        <div class="kpi-sub">Shipped in multiple chunks</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Newest Un-Polyfilled Feature</div>
+        <div class="kpi-value" style="font-size: 1.25rem; line-height: 1.3;">${escapeHtmlStr(s.siteMostModernFeatureName || 'ES' + s.siteNativeSyntaxFloorYear)}</div>
+        <div class="kpi-sub">Baseline: ${escapeHtmlStr(s.siteMostModernFeatureBaselineDate || String(s.siteNativeSyntaxFloorYear))} &middot; Oldest polyfill: ${s.inferredPolyfillFloorYear ? 'ES' + s.inferredPolyfillFloorYear : 'None'}</div>
+      </div>
+    </div>
+
+    ${
+      report.duplicatePolyfills && report.duplicatePolyfills.length > 0
+        ? `<div id="duplicates-section" style="margin-bottom: 2.25rem;">
+            <div class="section-header">
+              <h2>🔄 Duplicate Polyfills Shipped Across Multiple Bundles</h2>
+            </div>
+            <div class="bundle-card">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Feature Name</th>
+                    <th>Baseline Year</th>
+                    <th>Status</th>
+                    <th>Duplicated In Bundles (with 1:1 Byte Offsets)</th>
+                  </tr>
+                </thead>
+                <tbody id="duplicates-tbody">${dupRowsHtml}</tbody>
+              </table>
+            </div>
+          </div>`
+        : ''
+    }
+
+    <div class="section-header">
+      <h2>📦 Bundle-by-Bundle Breakdown &amp; 1:1 AST Matches</h2>
+      <div class="filter-bar">
+        <button class="pill-btn active" id="btn-filter-all" onclick="filterBundles('all')">All Bundles</button>
+        <button class="pill-btn" id="btn-filter-polyfills" onclick="filterBundles('polyfills')">With Polyfills Only</button>
+        <button class="pill-btn" id="btn-filter-high" onclick="filterBundles('high')">Obsolete (${escapeHtmlStr(targetShortName)})</button>
+      </div>
+    </div>
+    <div id="bundles-list">
+      ${bundleCardsHtml}
+    </div>
+  </main>
+
+  <script>
+    const currentReport = ${safeJson};
+    const currentMarkdown = ${safeMarkdown};
+
+    function filterBundles(mode) {
+      document.querySelectorAll('.filter-bar .pill-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-filter-' + mode);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.querySelectorAll('#bundles-list .bundle-card').forEach(card => {
+        if (mode === 'all') {
+          card.style.display = 'block';
+        } else if (mode === 'polyfills') {
+          card.style.display = card.getAttribute('data-has-polyfills') === 'true' ? 'block' : 'none';
+        } else if (mode === 'high') {
+          card.style.display = card.getAttribute('data-has-high') === 'true' ? 'block' : 'none';
+        }
+      });
+    }
+
+    function downloadJsonReport() {
+      const blob = new Blob([JSON.stringify(currentReport, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'polyfill-analysis-report.json';
+      a.click();
+    }
+
+    function downloadMarkdownReport() {
+      const blob = new Blob([currentMarkdown], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'polyfill-analysis-report.md';
+      a.click();
+    }
+  </script>
+</body>
+</html>`;
+}

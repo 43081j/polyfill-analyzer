@@ -10,6 +10,7 @@ import {
   scanWebsiteUrl,
   analyzeBundles,
   formatWebsiteMarkdownReport,
+  formatWebsiteHtmlReport,
   WebsiteScanReport,
 } from '../engine/index.js';
 import { loadCatalog } from '../catalog/index.js';
@@ -917,6 +918,23 @@ const UI_HTML = `<!DOCTYPE html>
       }
     }
 
+    function downloadHtmlReport() {
+      if (!currentReport) return;
+      fetch('/api/format-html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentReport)
+      })
+      .then(r => r.text())
+      .then(html => {
+        const blob = new Blob([html], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'polyfill-analysis-report.html';
+        a.click();
+      });
+    }
+
     function downloadMarkdownReport() {
       if (!currentReport) return;
       fetch('/api/format-markdown', {
@@ -1102,6 +1120,22 @@ export function startWebServer(port = 3000): http.Server {
       return;
     }
 
+    if (req.method === 'POST' && urlObj.pathname === '/api/format-html') {
+      let body = '';
+      req.on('data', (chunk) => (body += chunk));
+      req.on('end', () => {
+        try {
+          const report = JSON.parse(body || '{}');
+          const html = formatWebsiteHtmlReport(report);
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(html);
+        } catch (err: any) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Error formatting HTML: ' + err.message);
+        }
+      });
+      return;
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Not found' }));

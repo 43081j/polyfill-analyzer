@@ -108,4 +108,22 @@ describe('CLI Unit Tests', () => {
     expect(() => runCli([validBundlePath, '--format', 'xml'])).toThrow('EXIT_1');
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Unsupported format value'));
   });
+
+  it('generates a standalone local HTML report file matching Web UI sections when --format html -o <path> is used', () => {
+    const tmpHtmlPath = path.resolve(process.cwd(), 'tests/fixtures/tmp_report.html');
+    try {
+      runCli([validBundlePath, '--format', 'html', '-o', tmpHtmlPath, '--target-year', '2022']);
+      expect(fs.existsSync(tmpHtmlPath)).toBe(true);
+      const htmlContent = fs.readFileSync(tmpHtmlPath, 'utf8');
+      expect(htmlContent).toContain('<!DOCTYPE html>');
+      expect(htmlContent).toContain('High-Level Executive Recommendations (What You Need To Do)');
+      expect(htmlContent).toContain('Configured Baseline Target: Baseline 2022');
+      expect(htmlContent).toContain('Bundle-by-Bundle Breakdown &amp; 1:1 AST Matches');
+      expect(htmlContent).toContain('Baseline Widely available');
+    } finally {
+      if (fs.existsSync(tmpHtmlPath)) {
+        fs.unlinkSync(tmpHtmlPath);
+      }
+    }
+  });
 });

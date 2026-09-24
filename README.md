@@ -29,6 +29,15 @@ Fetch a website's HTML, discover and download its production JS bundles, and out
 # Output Markdown report with High-Level Recommendations at the top
 npx polyfill-analyzer url https://www.target.com/ --max-bundles 20 --format markdown
 
+# Generate a standalone local HTML report (with the full Web UI dashboard experience)
+npx polyfill-analyzer url https://www.target.com/ --format html -o target-report.html
+
+# Set a custom Baseline Target (matches baseline-browser-mapping CLI options):
+#   --target-year <YYYY>: warn on features not available across all browsers by end of YYYY
+#   --widely-available-on-date <YYYY-MM-DD>: warn on features with baseline_low_date > (date minus 30 months)
+npx polyfill-analyzer url https://www.target.com/ --target-year 2022
+npx polyfill-analyzer url https://www.target.com/ --widely-available-on-date 2025-01-01
+
 # Output raw JSON report
 npx polyfill-analyzer url https://www.target.com/ --json
 ```
@@ -37,6 +46,13 @@ npx polyfill-analyzer url https://www.target.com/ --json
 ```bash
 # Default tabular terminal report
 npx polyfill-analyzer ./dist/bundle.min.js
+
+# Generate a standalone local HTML file (defaults to ./polyfill-report.html or specify -o)
+npx polyfill-analyzer ./dist/bundle.min.js --format html -o ./bundle-report.html
+
+# Warn against a specific Baseline target year or Widely available cutoff date
+npx polyfill-analyzer ./dist/bundle.min.js --target-year 2022
+npx polyfill-analyzer ./dist/bundle.min.js --widely-available-on-date 2025-01-01
 
 # Markdown report with Executive Summary
 npx polyfill-analyzer ./dist/bundle.min.js --format markdown
@@ -54,9 +70,10 @@ npm run web
 ```
 Then open **`http://localhost:3456`** to:
 - Enter any website URL to analyze its production bundles live.
+- Configure a **Baseline Target** (`Baseline Widely available (Today)`, `--target-year`, or `--widely-available-on-date`).
 - View **High-Level Executive Recommendations** highlighted right at the top.
 - Filter bundles by Baseline status and inspect **1:1 Minified AST Match Snippets** with byte offsets.
-- Export reports as Markdown or JSON with one click.
+- Export reports as Standalone HTML, Markdown, or JSON with one click.
 
 ---
 
