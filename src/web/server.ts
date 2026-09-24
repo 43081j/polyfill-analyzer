@@ -510,6 +510,18 @@ const UI_HTML = `<!DOCTYPE html>
   </header>
 
   <main>
+    <!-- Baseline Target Configuration Bar -->
+    <div class="control-panel" style="padding: 0.9rem 1.25rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
+      <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">🎯 Baseline Target Warning Threshold:</div>
+      <select id="baseline-target-mode" onchange="onBaselineTargetModeChange()" style="background: rgba(15,23,42,0.85); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem 0.75rem; font-size: 0.85rem;">
+        <option value="default">Baseline Widely available (Today — default)</option>
+        <option value="target-year">--target-year (Available in all browsers by end of YYYY)</option>
+        <option value="widely-available-on-date">--widely-available-on-date (Widely available on YYYY-MM-DD, i.e. low_date - 30m)</option>
+      </select>
+      <input type="number" id="baseline-target-year" min="2015" max="2026" value="2022" placeholder="2022" style="display: none; width: 100px; padding: 0.45rem 0.75rem; font-size: 0.85rem;" />
+      <input type="date" id="baseline-target-date" value="2025-01-01" style="display: none; width: 165px; padding: 0.45rem 0.75rem; font-size: 0.85rem; background: rgba(15,23,42,0.85); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px;" />
+    </div>
+
     <!-- URL Mode Control Panel -->
     <div id="panel-url" class="control-panel">
       <div class="url-input-group">
@@ -548,6 +560,7 @@ const UI_HTML = `<!DOCTYPE html>
       <div class="section-header">
         <h2>🎯 High-Level Executive Recommendations (What You Need To Do)</h2>
         <div class="export-actions">
+          <button class="btn btn-secondary" onclick="downloadHtmlReport()">⬇️ Export Standalone HTML</button>
           <button class="btn btn-secondary" onclick="downloadMarkdownReport()">⬇️ Export Markdown Report</button>
           <button class="btn btn-secondary" onclick="downloadJsonReport()">⬇️ Export JSON</button>
         </div>
@@ -628,6 +641,25 @@ const UI_HTML = `<!DOCTYPE html>
       }
     }
 
+    function onBaselineTargetModeChange() {
+      const mode = document.getElementById('baseline-target-mode').value;
+      document.getElementById('baseline-target-year').style.display = mode === 'target-year' ? 'inline-block' : 'none';
+      document.getElementById('baseline-target-date').style.display = mode === 'widely-available-on-date' ? 'inline-block' : 'none';
+    }
+
+    function getBaselineTargetPayload() {
+      const mode = document.getElementById('baseline-target-mode').value;
+      if (mode === 'target-year') {
+        const yr = parseInt(document.getElementById('baseline-target-year').value, 10);
+        return { targetYear: Number.isNaN(yr) ? undefined : yr };
+      }
+      if (mode === 'widely-available-on-date') {
+        const dt = document.getElementById('baseline-target-date').value;
+        return { widelyAvailableOnDate: dt || undefined };
+      }
+      return {};
+    }
+
     async function runUrlScan() {
       const url = document.getElementById('target-url').value.trim();
       if (!url) return alert('Please enter a website URL');
@@ -636,7 +668,7 @@ const UI_HTML = `<!DOCTYPE html>
         const res = await fetch('/api/scan-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, maxBundles: 20 })
+          body: JSON.stringify({ url, maxBundles: 20, ...getBaselineTargetPayload() })
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -667,7 +699,7 @@ const UI_HTML = `<!DOCTYPE html>
         const res = await fetch('/api/scan-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, filename: 'pasted-bundle.min.js' })
+          body: JSON.stringify({ code, filename: 'pasted-bundle.min.js', ...getBaselineTargetPayload() })
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -705,7 +737,17 @@ const UI_HTML = `<!DOCTYPE html>
 
       // 2. Render KPI Grid
       const s = report.summary;
+      const bt = report.baselineTarget;
+      const targetShortName = bt?.shortTargetName || 'Baseline Widely available';
       const totalKB = (s.totalBytesScanned / 1024).toFixed(1);
+      const highBtn = document.querySelector('button[onclick="filterBundles(\\'high\\')"]');
+      if (highBtn) {
+        highBtn.textContent = 'Obsolete (' + targetShortName + ')';
+      }
+      const estSavingsKB = ((s.estimatedTotalSavingsBytes || 0) / 1024).toFixed(1);
+      const polyBundleKB = ((s.polyfillsBundleTotalBytes || 0) / 1024).toFixed(1);
+      const postBundleKB = ((s.estimatedPostRemovalPolyfillBundleBytes || 0) / 1024).toFixed(1);
+      const savingsPct = s.estimatedPolyfillBundleSavingsPercentage || 0;
       document.getElementById('kpi-grid').innerHTML = \`
         <div class="kpi-card">
           <div class="kpi-label">Bundles Analyzed</div>
@@ -718,9 +760,14 @@ const UI_HTML = `<!DOCTYPE html>
           <div class="kpi-sub">Across \${s.uniqueFeaturesPolyfilled} distinct ES features</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Redundant (Baseline Widely available)</div>
+          <div class="kpi-label">Redundant (\${escapeHtml(targetShortName)})</div>
           <div class="kpi-value" style="color: \${s.redundantPercentage > 50 ? '#fca5a5' : '#86efac'}">\${s.redundantPercentage}%</div>
-          <div class="kpi-sub">\${s.redundantPolyfillCount} of \${s.totalPolyfillInstances} natively supported</div>
+          <div class="kpi-sub">\${s.redundantPolyfillCount} of \${s.totalPolyfillInstances} natively in \${escapeHtml(targetShortName)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Estimated Size Savings</div>
+          <div class="kpi-value" style="color: #38bdf8">-\${estSavingsKB} KB</div>
+          <div class="kpi-sub">\${polyBundleKB} KB &rarr; ~\${postBundleKB} KB (-\${savingsPct}%)</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Duplicate Polyfills</div>
@@ -728,9 +775,9 @@ const UI_HTML = `<!DOCTYPE html>
           <div class="kpi-sub">Shipped in multiple chunks</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">App Native Syntax Floor</div>
-          <div class="kpi-value">ES\${s.siteNativeSyntaxFloorYear}</div>
-          <div class="kpi-sub">Oldest polyfill: \${s.inferredPolyfillFloorYear ? 'ES' + s.inferredPolyfillFloorYear : 'None'}</div>
+          <div class="kpi-label">Newest Un-Polyfilled Feature</div>
+          <div class="kpi-value" style="font-size: 1.25rem; line-height: 1.3;">\${escapeHtml(s.siteMostModernFeatureName || 'ES' + s.siteNativeSyntaxFloorYear)}</div>
+          <div class="kpi-sub">Baseline: \${escapeHtml(s.siteMostModernFeatureBaselineDate || String(s.siteNativeSyntaxFloorYear))} &middot; Oldest polyfill: \${s.inferredPolyfillFloorYear ? 'ES' + s.inferredPolyfillFloorYear : 'None'}</div>
         </div>
       \`;
 
@@ -771,20 +818,36 @@ const UI_HTML = `<!DOCTYPE html>
       const list = document.getElementById('bundles-list');
       list.innerHTML = '';
 
+      const bt = currentReport.baselineTarget;
+      const targetShortName = bt?.shortTargetName || 'Baseline Widely available';
+      const supportedIds = new Set((bt?.supportedByTargetFeatures || []).map(r => r.id));
+
       const bundles = currentReport.bundles.filter(b => {
         if (activeFilter === 'polyfills') return b.detectedPolyfills.length > 0;
-        if (activeFilter === 'high') return b.detectedPolyfills.some(d => d.baselineStatus === 'high');
+        if (activeFilter === 'high') {
+          return b.detectedPolyfills.some(d =>
+            bt && bt.mode !== 'default' ? supportedIds.has(d.id) : d.baselineStatus === 'high'
+          );
+        }
         return true;
       });
 
       for (const b of bundles) {
         const kb = (b.sizeBytes / 1024).toFixed(1);
+        const savedKb = ((b.estimatedSavingsBytes || 0) / 1024).toFixed(1);
+        const postKb = ((b.estimatedPostRemovalBytes ?? b.sizeBytes) / 1024).toFixed(1);
+        const pct = b.estimatedSavingsPercentage || 0;
         const card = document.createElement('div');
         card.className = 'bundle-card';
 
         const statusBadge = b.detectedPolyfills.length === 0
           ? '<span class="badge" style="background: rgba(34,197,94,0.2); color: #86efac;">✅ CLEAN (0 Polyfills)</span>'
           : \`<span class="badge badge-HIGH">\${b.detectedPolyfills.length} Polyfills Detected</span>\`;
+
+        const savingsBadge = b.detectedPolyfills.length > 0 && (b.estimatedSavingsBytes || 0) > 0
+          ? \`<span>Est. After Removal: <strong style="color: #86efac;">~\${postKb} KB</strong></span>
+             <span class="badge badge-high-status">💾 Save ~\${savedKb} KB (-\${pct}%)</span>\`
+          : '';
 
         let tableHtml = '';
         if (b.detectedPolyfills.length > 0) {
@@ -794,11 +857,22 @@ const UI_HTML = `<!DOCTYPE html>
             const origHtml = origList.length > 0
               ? origList.map(o => \`<div style="margin-top:0.3rem; font-size:0.75rem; color:#86efac;">↳ Source Map: <code>\${escapeHtml(o.sourceFile)}:\${o.line}</code></div>\`).join('')
               : '';
+            const isObsolete = bt && bt.mode !== 'default' ? supportedIds.has(d.id) : d.baselineStatus === 'high';
+            const estFeatureKb = ((d.estimatedSizeBytes || 1800) / 1024).toFixed(1);
+            const targetVerdictHtml = bt && bt.mode !== 'default'
+              ? (isObsolete
+                ? \`<div style="margin-bottom:0.3rem;"><span class="badge badge-high-status">✅ Obsolete in \${escapeHtml(targetShortName)}</span></div>\`
+                : \`<div style="margin-bottom:0.3rem;"><span class="badge badge-low-status">⚠️ Exceeds \${escapeHtml(targetShortName)} (\${escapeHtml(d.baselineLowDate || String(d.baselineYear || 'N/A'))})</span></div>\`)
+              : '';
             return \`
               <tr>
                 <td><strong>\${escapeHtml(d.name)}</strong><br><code style="font-size:0.75rem; color:var(--text-muted)">\${d.id}</code></td>
                 <td>\${d.baselineYear ?? 'N/A'}</td>
-                <td><span class="badge badge-\${d.baselineStatus}-status">\${formatBaselineStatus(d.baselineStatus)}</span></td>
+                <td>
+                  <strong>~\${estFeatureKb} KB</strong><br>
+                  <span style="font-size:0.73rem; color:\${isObsolete ? '#86efac' : '#fde047'}">\${isObsolete ? '🗑️ Save if removed' : '📌 Retained for target'}</span>
+                </td>
+                <td>\${targetVerdictHtml}<span class="badge badge-\${d.baselineStatus}-status" style="\${bt && bt.mode !== 'default' ? 'opacity:0.82;' : ''}">\${formatBaselineStatus(d.baselineStatus)}</span></td>
                 <td>Line \${loc.line ?? 1}, Col \${loc.column ?? '?'}<br><span style="font-size:0.75rem; color:var(--text-muted)">Offset: \${loc.byteOffset ?? 'N/A'}</span></td>
                 <td>
                   <code class="code-snippet">\${escapeHtml(loc.snippet || '')}</code>
@@ -814,6 +888,7 @@ const UI_HTML = `<!DOCTYPE html>
                 <tr>
                   <th>Feature</th>
                   <th>Baseline Year</th>
+                  <th>Est. Size</th>
                   <th>Status</th>
                   <th>Minified AST Location</th>
                   <th>1:1 Production AST Match Snippet</th>
@@ -832,7 +907,8 @@ const UI_HTML = `<!DOCTYPE html>
               <span style="color: var(--text-muted); font-weight: 400;">(\${kb} KB)</span>
             </div>
             <div class="bundle-meta">
-              <span>Syntax Floor: <strong>ES\${b.nativeSyntaxStats.inferredSyntaxFloorYear}</strong> (\${b.nativeSyntaxStats.asyncCount} native async fns)</span>
+              \${savingsBadge}
+              <span>Newest Un-Polyfilled: <strong>\${escapeHtml(b.nativeSyntaxStats.mostModernFeatureName || 'ES' + b.nativeSyntaxStats.inferredSyntaxFloorYear)}</strong>\${b.nativeSyntaxStats.mostModernFeatureBaselineDate ? ' (' + escapeHtml(b.nativeSyntaxStats.mostModernFeatureBaselineDate) + ')' : ''}</span>
             </div>
           </div>
           \${tableHtml}
@@ -957,9 +1033,13 @@ export function startWebServer(port = 3000): http.Server {
       req.on('data', (chunk) => (body += chunk));
       req.on('end', async () => {
         try {
-          const { url, maxBundles } = JSON.parse(body || '{}');
+          const { url, maxBundles, targetYear, widelyAvailableOnDate } = JSON.parse(body || '{}');
           if (!url) throw new Error('Missing url parameter');
-          const report = await scanWebsiteUrl(url, { maxBundles: maxBundles ?? 20 });
+          const report = await scanWebsiteUrl(url, {
+            maxBundles: maxBundles ?? 20,
+            targetYear: targetYear !== undefined ? Number(targetYear) : undefined,
+            widelyAvailableOnDate,
+          });
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(report));
         } catch (err: any) {
@@ -975,16 +1055,26 @@ export function startWebServer(port = 3000): http.Server {
       req.on('data', (chunk) => (body += chunk));
       req.on('end', () => {
         try {
-          const { code, filename, sourceMap } = JSON.parse(body || '{}');
+          const { code, filename, sourceMap, targetYear, widelyAvailableOnDate } = JSON.parse(
+            body || '{}'
+          );
           if (!code) throw new Error('Missing code parameter');
-          const report = analyzeBundles(filename || 'bundle.js', 1, [
+          const report = analyzeBundles(
+            filename || 'bundle.js',
+            1,
+            [
+              {
+                url: filename || 'bundle.js',
+                fileName: filename || 'bundle.js',
+                code,
+                sourceMapJson: sourceMap,
+              },
+            ],
             {
-              url: filename || 'bundle.js',
-              fileName: filename || 'bundle.js',
-              code,
-              sourceMapJson: sourceMap,
-            },
-          ]);
+              targetYear: targetYear !== undefined ? Number(targetYear) : undefined,
+              widelyAvailableOnDate,
+            }
+          );
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(report));
         } catch (err: any) {
@@ -1011,6 +1101,7 @@ export function startWebServer(port = 3000): http.Server {
       });
       return;
     }
+
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Not found' }));

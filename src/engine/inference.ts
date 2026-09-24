@@ -1,5 +1,197 @@
 import chalk from 'chalk';
+import { getCompatibleVersions } from 'baseline-browser-mapping';
 import { RuleEntry } from '../catalog/index.js';
+
+export interface BaselineTargetOptions {
+  /**
+   * Pass a year between 2015 and the current year to target all features
+   * available across all core browsers by the end of that calendar year (YYYY-12-31).
+   * Matches baseline-browser-mapping `--target-year`.
+   */
+  targetYear?: number;
+  /**
+   * Pass a date in the format 'YYYY-MM-DD' to target features that were
+   * Baseline Widely available on the specified date (i.e. baseline_low_date <= date minus 30 months).
+   * Matches baseline-browser-mapping `--widely-available-on-date`.
+   */
+  widelyAvailableOnDate?: string;
+}
+
+export interface CompatibleBrowserVersion {
+  browser: string;
+  version: string;
+  release_date?: string;
+}
+
+export interface BaselineTargetEvaluation {
+  mode: 'target-year' | 'widely-available-on-date' | 'default';
+  targetYear: number | null;
+  widelyAvailableOnDate: string | null;
+  featureCutoffDate: string;
+  shortTargetName: string;
+  targetLabel: string;
+  compatibleBrowsers: CompatibleBrowserVersion[];
+  supportedByTargetFeatures: RuleEntry[];
+  exceedingTargetFeatures: RuleEntry[];
+  warnings: string[];
+}
+
+/**
+ * Subtracts 30 months (2 years, 6 months) from a YYYY-MM-DD date string
+ * to compute the maximum `baseline_low_date` for features that are
+ * Baseline Widely available on `dateStr`.
+ */
+export function subtractThirtyMonths(dateStr: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr.trim());
+  if (!match) {
+    throw new Error(`Invalid date format "${dateStr}". Expected YYYY-MM-DD.`);
+  }
+  const year = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const day = parseInt(match[3], 10);
+
+  const totalMonths = year * 12 + (month - 1) - 30;
+  const targetYear = Math.floor(totalMonths / 12);
+  const targetMonthIndex = ((totalMonths % 12) + 12) % 12;
+  const maxDayInMonth = new Date(Date.UTC(targetYear, targetMonthIndex + 1, 0)).getUTCDate();
+  const clampedDay = Math.min(day, maxDayInMonth);
+
+  const y = String(targetYear).padStart(4, '0');
+  const m = String(targetMonthIndex + 1).padStart(2, '0');
+  const d = String(clampedDay).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export function evaluateBaselineTarget(
+  detected: RuleEntry[],
+  options?: BaselineTargetOptions
+): BaselineTargetEvaluation {
+  const hasYear = options?.targetYear !== undefined && options?.targetYear !== null;
+  const hasDate =
+    typeof options?.widelyAvailableOnDate === 'string' &&
+    options.widelyAvailableOnDate.trim().length > 0;
+
+  if (hasYear && hasDate) {
+    throw new Error(
+      'Cannot use --target-year and --widely-available-on-date together (matches baseline-browser-mapping CLI).'
+    );
+  }
+
+  let mode: 'target-year' | 'widely-available-on-date' | 'default' = 'default';
+  let targetYear: number | null = null;
+  let widelyAvailableOnDate: string | null = null;
+  let featureCutoffDate: string;
+  let shortTargetName: string;
+  let targetLabel: string;
+
+  if (hasYear) {
+    const yr = Number(options!.targetYear);
+    const currentYear = new Date().getUTCFullYear();
+    if (!Number.isInteger(yr) || yr < 2015 || yr > currentYear) {
+      throw new Error(
+        `Invalid --target-year "${options!.targetYear}". Must be a year between 2015 and ${currentYear}.`
+      );
+    }
+    mode = 'target-year';
+    targetYear = yr;
+    featureCutoffDate = `${yr}-12-31`;
+    shortTargetName = `Baseline ${yr}`;
+    targetLabel = `Baseline ${yr} (available in all core browsers by ${featureCutoffDate})`;
+  } else if (hasDate) {
+    const dateStr = options!.widelyAvailableOnDate!.trim();
+    featureCutoffDate = subtractThirtyMonths(dateStr);
+    mode = 'widely-available-on-date';
+    widelyAvailableOnDate = dateStr;
+    shortTargetName = `Baseline Widely available on ${dateStr}`;
+    targetLabel = `Baseline Widely available on ${dateStr} (baseline_low_date <= ${featureCutoffDate}, i.e. -30 months)`;
+  } else {
+    const today = new Date().toISOString().slice(0, 10);
+    featureCutoffDate = subtractThirtyMonths(today);
+    mode = 'default';
+    shortTargetName = 'Baseline Widely available';
+    targetLabel = `Baseline Widely available (baseline_low_date <= ${featureCutoffDate})`;
+  }
+
+  let compatibleBrowsers: CompatibleBrowserVersion[] = [];
+  try {
+    const bbmOpts: Record<string, any> = { suppressWarnings: true };
+    if (targetYear !== null) bbmOpts.targetYear = targetYear;
+    if (widelyAvailableOnDate !== null) bbmOpts.widelyAvailableOnDate = widelyAvailableOnDate;
+    const rawBrowsers = getCompatibleVersions(bbmOpts);
+    if (Array.isArray(rawBrowsers)) {
+      compatibleBrowsers = rawBrowsers.map(b => ({
+        browser: b.browser,
+        version: b.version,
+        release_date: b.release_date,
+      }));
+    }
+  } catch {
+    compatibleBrowsers = [];
+  }
+
+  const supportedByTargetFeatures: RuleEntry[] = [];
+  const exceedingTargetFeatures: RuleEntry[] = [];
+
+  for (const r of detected) {
+    const lowDate =
+      r.baselineLowDate ?? (r.baselineYear !== null ? `${r.baselineYear}-12-31` : null);
+    const isObsoleteForTarget =
+      mode === 'default'
+        ? r.baselineStatus === 'high' || (lowDate !== null && lowDate <= featureCutoffDate)
+        : lowDate !== null && lowDate <= featureCutoffDate;
+    if (isObsoleteForTarget) {
+      supportedByTargetFeatures.push(r);
+    } else {
+      exceedingTargetFeatures.push(r);
+    }
+  }
+
+  const warnings: string[] = [];
+  const seenExceeding = new Set<string>();
+  for (const r of exceedingTargetFeatures) {
+    if (seenExceeding.has(r.id)) continue;
+    seenExceeding.add(r.id);
+    const lowDate =
+      r.baselineLowDate ?? (r.baselineYear !== null ? `${r.baselineYear}-12-31` : 'unbaselined');
+    if (mode === 'target-year') {
+      warnings.push(
+        `[Target Warning] ${r.name} (${r.id}) reached Baseline on ${lowDate} (after ${featureCutoffDate}) and exceeds --target-year ${targetYear}. Retain polyfill or raise target.`
+      );
+    } else if (mode === 'widely-available-on-date') {
+      warnings.push(
+        `[Target Warning] ${r.name} (${r.id}) has baseline_low_date ${lowDate} (after ${featureCutoffDate}, which is ${widelyAvailableOnDate} minus 30 months) and was not yet Widely available on ${widelyAvailableOnDate}.`
+      );
+    } else {
+      warnings.push(
+        `[Target Warning] ${r.name} (${r.id}) has baseline_low_date ${lowDate} (after ${featureCutoffDate}) and is not yet Baseline Widely available.`
+      );
+    }
+  }
+
+  const seenSupported = new Set<string>();
+  for (const r of supportedByTargetFeatures) {
+    if (seenSupported.has(r.id)) continue;
+    seenSupported.add(r.id);
+    const lowDate =
+      r.baselineLowDate ?? (r.baselineYear !== null ? `${r.baselineYear}-12-31` : 'unknown');
+    warnings.push(
+      `[Obsolete for ${shortTargetName}] ${r.name} (${r.id}) (baseline_low_date: ${lowDate} <= ${featureCutoffDate}) is already natively supported in ${targetLabel} — polyfill is unnecessary.`
+    );
+  }
+
+  return {
+    mode,
+    targetYear,
+    widelyAvailableOnDate,
+    featureCutoffDate,
+    shortTargetName,
+    targetLabel,
+    compatibleBrowsers,
+    supportedByTargetFeatures,
+    exceedingTargetFeatures,
+    warnings,
+  };
+}
 
 export function computeBaselineStatus(detected: RuleEntry[]): 'low' | 'high' | 'false' {
   if (detected.some(r => r.baselineStatus === 'false')) {
@@ -22,7 +214,10 @@ export function inferBaselineYear(detected: RuleEntry[]): number | null {
   return null;
 }
 
-export function generateRecommendations(detected: RuleEntry[]): {
+export function generateRecommendations(
+  detected: RuleEntry[],
+  targetOptions?: BaselineTargetOptions
+): {
   modernizationSuggestion: string;
   recommendations: string[];
 } {
@@ -36,15 +231,44 @@ export function generateRecommendations(detected: RuleEntry[]): {
     };
   }
 
+  const targetEval = evaluateBaselineTarget(detected, targetOptions);
+  const supportedIds = new Set(targetEval.supportedByTargetFeatures.map(r => r.id));
+
   const sorted = detected.slice().sort((a, b) => a.id.localeCompare(b.id));
   const deduplicatedSuggestions = Array.from(new Set(sorted.map(r => {
     const bundlersStr = r.bundlers && r.bundlers.length > 0 ? `[${r.bundlers.join(', ')}]` : '[]';
     const yearStr = r.baselineYear !== null ? `${r.baselineYear}` : 'N/A';
+    const lowDateStr = r.baselineLowDate ?? yearStr;
+    if (targetEval.mode !== 'default') {
+      if (supportedIds.has(r.id)) {
+        return `Inferred: ${bundlersStr} polyfilled ${r.name} (baseline_low_date: ${lowDateStr} <= ${targetEval.featureCutoffDate}). Obsolete for ${targetEval.shortTargetName}: remove polyfill.`;
+      }
+      return `Inferred: ${bundlersStr} polyfilled ${r.name} (baseline_low_date: ${lowDateStr} > ${targetEval.featureCutoffDate}). Exceeds ${targetEval.shortTargetName}: retain polyfill for ${targetEval.shortTargetName} compatibility.`;
+    }
     return `Inferred: ${bundlersStr} polyfilled ${r.name}. This feature became Baseline on ${yearStr} (${r.baselineStatus}). ${r.modernSuggestion}`;
   })));
 
   const hasLegacyES5 = sorted.some(r => r.baselineYear !== null && r.baselineYear <= 2015);
-  const allHigh = sorted.every(r => r.baselineStatus === 'high');
+  const allObsoleteForTarget = targetEval.exceedingTargetFeatures.length === 0;
+
+  if (targetEval.mode !== 'default') {
+    if (allObsoleteForTarget) {
+      return {
+        modernizationSuggestion: `Obsolete polyfills detected. All detected features are natively supported in ${targetEval.shortTargetName} browsers. Remove these polyfills to optimize bundle size and performance.`,
+        recommendations: [
+          `Remove obsolete polyfills that are natively supported across ${targetEval.shortTargetName} browsers.`,
+          ...deduplicatedSuggestions
+        ]
+      };
+    }
+    return {
+      modernizationSuggestion: `Polyfills exceeding ${targetEval.shortTargetName} detected (${targetEval.exceedingTargetFeatures.length} post-${targetEval.featureCutoffDate} feature(s), ${targetEval.supportedByTargetFeatures.length} obsolete pre-${targetEval.featureCutoffDate} feature(s)). Retain shims for features after ${targetEval.featureCutoffDate} while removing obsolete ${targetEval.shortTargetName} shims.`,
+      recommendations: [
+        `Retain polyfills for features exceeding ${targetEval.shortTargetName} and remove obsolete pre-${targetEval.featureCutoffDate} shims.`,
+        ...deduplicatedSuggestions
+      ]
+    };
+  }
 
   if (hasLegacyES5) {
     return {
@@ -56,7 +280,7 @@ export function generateRecommendations(detected: RuleEntry[]): {
     };
   }
 
-  if (allHigh) {
+  if (allObsoleteForTarget) {
     return {
       modernizationSuggestion: 'Obsolete polyfills detected. All detected features are natively supported in Baseline Widely available browsers. Remove these polyfills to optimize bundle size and performance.',
       recommendations: [
@@ -81,7 +305,8 @@ export function formatTableReport(
   status: 'low' | 'high' | 'false',
   year: number | null,
   suggestion: string,
-  recommendations?: string[]
+  recommendations?: string[],
+  baselineTarget?: BaselineTargetEvaluation
 ): string {
   const lines: string[] = [];
   lines.push(chalk.bold.cyan('\n=== Polyfill Analyzer Report ==='));
@@ -91,7 +316,27 @@ export function formatTableReport(
   const statusColor = status === 'high' ? chalk.green : status === 'low' ? chalk.yellow : chalk.red;
   lines.push(`${chalk.bold('Baseline Status:')}  ${statusColor(status.toUpperCase())}`);
   lines.push(`${chalk.bold('Baseline Year:')}    ${year !== null ? year : 'N/A'}`);
+  if (baselineTarget) {
+    lines.push(`${chalk.bold('Baseline Target:')}  ${chalk.magenta(baselineTarget.targetLabel)}`);
+    if (baselineTarget.compatibleBrowsers.length > 0) {
+      const coreBrowsers = baselineTarget.compatibleBrowsers
+        .filter(b => ['chrome', 'edge', 'firefox', 'safari'].includes(b.browser))
+        .map(b => `${b.browser} ${b.version}+`)
+        .join(', ');
+      if (coreBrowsers) {
+        lines.push(`${chalk.bold('Target Browsers:')}  ${coreBrowsers}`);
+      }
+    }
+  }
   lines.push(`${chalk.bold('Recommendation:')}   ${chalk.italic(suggestion)}\n`);
+
+  if (baselineTarget && baselineTarget.warnings.length > 0) {
+    lines.push(chalk.bold.yellow('Baseline Target Warnings:'));
+    for (const w of baselineTarget.warnings) {
+      lines.push(` ⚠️  ${w}`);
+    }
+    lines.push('');
+  }
 
   if (recommendations && recommendations.length > 0) {
     lines.push(chalk.bold('Actionable Recommendations:'));

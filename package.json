@@ -38,32 +38,33 @@
   "dependencies": {
     "@ast-grep/napi": "^0.40.5",
     "@mdn/browser-compat-data": "^5.5.0",
-    "web-features": "^3.32.0",
+    "baseline-browser-mapping": "^2.11.24",
     "browserslist": "^4.23.0",
-    "semver": "^7.6.0",
-    "commander": "^12.0.0",
-    "zod": "^3.23.0",
     "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "es-samples": "file:../es-samples",
+    "semver": "^7.6.0",
+    "web-features": "^3.32.0",
     "yaml": "^2.4.0",
-    "es-samples": "file:../es-samples"
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@types/node": "^20.12.0",
-    "@types/semver": "^7.5.8",
-    "typescript": "^5.4.5",
-    "vitest": "^1.5.0",
-    "eslint": "^8.57.0",
-    "core-js": "^3.37.0",
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "rollup": "^4.14.0",
+    "@swc/core": "^1.4.11",
+    "@types/node": "^20.12.0",
+    "@types/semver": "^7.5.8",
+    "core-js": "^3.37.0",
     "esbuild": "^0.20.2",
-    "webpack": "^5.91.0",
+    "eslint": "^8.57.0",
+    "rollup": "^4.14.0",
     "swc-loader": "^0.2.4",
-    "@swc/core": "^1.4.11"
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0",
+    "webpack": "^5.91.0"
   }
 }

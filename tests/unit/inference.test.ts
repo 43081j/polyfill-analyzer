@@ -4,6 +4,8 @@ import {
   inferBaselineYear,
   generateRecommendations,
   formatTableReport,
+  subtractThirtyMonths,
+  evaluateBaselineTarget,
   clearRuleCache,
   RuleEntry
 } from '../../src/engine/index.js';
@@ -143,6 +145,46 @@ describe('Inference Engine Unit Tests', () => {
     it('formats clean message when 0 polyfills detected', () => {
       const table = formatTableReport('clean/path.js', [], 'high', null, 'Optimal state');
       expect(table).toContain('No polyfills detected');
+    });
+  });
+
+  describe('evaluateBaselineTarget & subtractThirtyMonths', () => {
+    it('correctly subtracts 30 months from a YYYY-MM-DD date string', () => {
+      expect(subtractThirtyMonths('2026-01-04')).toBe('2023-07-04');
+      expect(subtractThirtyMonths('2025-08-31')).toBe('2023-02-28');
+      expect(subtractThirtyMonths('2024-06-15')).toBe('2021-12-15');
+    });
+
+    it('supports --target-year (features available by end of that calendar year)', () => {
+      const rule2020 = { ...mockRuleHigh, id: 'promise-any', name: 'Promise.any', baselineYear: 2020, baselineLowDate: '2020-09-16' };
+      const rule2024 = { ...mockRuleLow, id: 'promise-with-resolvers', name: 'Promise.withResolvers', baselineYear: 2024, baselineLowDate: '2024-03-05' };
+
+      const eval2022 = evaluateBaselineTarget([rule2020, rule2024], { targetYear: 2022 });
+      expect(eval2022.mode).toBe('target-year');
+      expect(eval2022.featureCutoffDate).toBe('2022-12-31');
+      expect(eval2022.supportedByTargetFeatures.map(r => r.id)).toEqual(['promise-any']);
+      expect(eval2022.exceedingTargetFeatures.map(r => r.id)).toEqual(['promise-with-resolvers']);
+      expect(eval2022.compatibleBrowsers.length).toBeGreaterThan(0);
+      expect(eval2022.warnings.some(w => w.includes('Promise.withResolvers') && w.includes('exceeds --target-year 2022'))).toBe(true);
+    });
+
+    it('supports --widely-available-on-date (baseline_low_date <= date minus 30 months)', () => {
+      const rule2022 = { ...mockRuleHigh, id: 'array-at', name: 'Array.prototype.at', baselineYear: 2022, baselineLowDate: '2022-03-14' };
+      const rule2023 = { ...mockRuleHigh, id: 'array-change-by-copy', name: 'Array.prototype.toSorted', baselineYear: 2023, baselineLowDate: '2023-07-04' };
+
+      // On 2025-01-01, -30 months is 2022-07-01 -> array-at (2022-03-14) is supported, array-change-by-copy (2023-07-04) exceeds
+      const evalDate = evaluateBaselineTarget([rule2022, rule2023], { widelyAvailableOnDate: '2025-01-01' });
+      expect(evalDate.mode).toBe('widely-available-on-date');
+      expect(evalDate.featureCutoffDate).toBe('2022-07-01');
+      expect(evalDate.supportedByTargetFeatures.map(r => r.id)).toEqual(['array-at']);
+      expect(evalDate.exceedingTargetFeatures.map(r => r.id)).toEqual(['array-change-by-copy']);
+      expect(evalDate.warnings.some(w => w.includes('Array.prototype.toSorted') && w.includes('was not yet Widely available on 2025-01-01'))).toBe(true);
+    });
+
+    it('rejects specifying both --target-year and --widely-available-on-date simultaneously', () => {
+      expect(() =>
+        evaluateBaselineTarget([], { targetYear: 2022, widelyAvailableOnDate: '2025-01-01' })
+      ).toThrow(/Cannot use --target-year and --widely-available-on-date together/);
     });
   });
 });
