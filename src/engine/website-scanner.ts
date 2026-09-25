@@ -1078,7 +1078,7 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
       const bundleChips = (rec.affectedBundles || [])
         .map(
           (b) =>
-            `<span class="chip" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe;">📦 ${escapeHtmlStr(b)}</span>`
+            `<span class="chip chip-bundle">📦 ${escapeHtmlStr(b)}</span>`
         )
         .join('');
       return `
@@ -1121,12 +1121,12 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
 
       const statusBadge =
         b.detectedPolyfills.length === 0
-          ? '<span class="badge" style="background: rgba(34,197,94,0.2); color: #86efac;">✅ CLEAN (0 Polyfills)</span>'
+          ? '<span class="badge badge-high-status">✅ CLEAN (0 Polyfills)</span>'
           : `<span class="badge badge-HIGH">${b.detectedPolyfills.length} Polyfills Detected</span>`;
 
       const savingsBadge =
         b.detectedPolyfills.length > 0 && (b.estimatedSavingsBytes ?? 0) > 0
-          ? `<span>Est. After Removal: <strong style="color: #86efac;">~${postKb} KB</strong></span>
+          ? `<span>Est. After Removal: <strong style="color: var(--vp-c-green-1);">~${postKb} KB</strong></span>
              <span class="badge badge-high-status">💾 Save ~${savedKb} KB (-${pct}%)</span>`
           : '';
 
@@ -1141,7 +1141,7 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
                 ? origList
                     .map(
                       (o) =>
-                        `<div style="margin-top:0.3rem; font-size:0.75rem; color:#86efac;">↳ Source Map: <code>${escapeHtmlStr(o.sourceFile)}:${o.line}</code></div>`
+                        `<div style="margin-top:0.3rem; font-size:0.75rem; color:var(--vp-c-green-1);">↳ Source Map: <code>${escapeHtmlStr(o.sourceFile)}:${o.line}</code></div>`
                     )
                     .join('')
                 : '';
@@ -1162,17 +1162,17 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
 
             return `
               <tr>
-                <td><strong>${escapeHtmlStr(d.name)}</strong><br><code style="font-size:0.75rem; color:var(--text-muted)">${escapeHtmlStr(d.id)}</code></td>
+                <td><strong>${escapeHtmlStr(d.name)}</strong><br><code style="font-size:0.75rem; color:var(--vp-c-text-2)">${escapeHtmlStr(d.id)}</code></td>
                 <td>${d.baselineYear ?? 'N/A'}</td>
                 <td>
                   <strong>~${estFeatureKb} KB</strong><br>
-                  <span style="font-size:0.73rem; color:${isObsolete ? '#86efac' : '#fde047'}">${isObsolete ? '🗑️ Save if removed' : '📌 Retained for target'}</span>
+                  <span style="font-size:0.73rem; color:${isObsolete ? 'var(--vp-c-green-1)' : 'var(--vp-c-yellow-1)'}">${isObsolete ? '🗑️ Save if removed' : '📌 Retained for target'}</span>
                 </td>
                 <td>
                   ${targetVerdictHtml}
-                  <span class="badge badge-${d.baselineStatus}-status" style="${bt && bt.mode !== 'default' ? 'opacity:0.82;' : ''}">${formatBaselineBadgeLabel(d.baselineStatus)}</span>
+                  <span class="badge badge-${d.baselineStatus}-status" style="${bt && bt.mode !== 'default' ? 'opacity:0.85;' : ''}">${formatBaselineBadgeLabel(d.baselineStatus)}</span>
                 </td>
-                <td>Line ${loc.line ?? 1}, Col ${loc.column ?? '?'}<br><span style="font-size:0.75rem; color:var(--text-muted)">Offset: ${loc.byteOffset ?? 'N/A'}</span></td>
+                <td>Line ${loc.line ?? 1}, Col ${loc.column ?? '?'}<br><span style="font-size:0.75rem; color:var(--vp-c-text-2)">Offset: ${loc.byteOffset ?? 'N/A'}</span></td>
                 <td>
                   <code class="code-snippet">${escapeHtmlStr(loc.snippet || '')}</code>
                   ${origHtml}
@@ -1207,7 +1207,7 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
         <div class="bundle-header">
           <div>
             <div class="bundle-title">📄 ${escapeHtmlStr(b.fileName)}</div>
-            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem; word-break: break-all;">${escapeHtmlStr(b.url)}</div>
+            <div style="font-size: 0.76rem; color: var(--vp-c-text-2); margin-top: 0.2rem; word-break: break-all;">${escapeHtmlStr(b.url)}</div>
           </div>
           <div class="bundle-meta">
             <span>Size: <strong>${kb} KB</strong></span>
@@ -1225,39 +1225,130 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
   const safeMarkdown = JSON.stringify(formatWebsiteMarkdownReport(report)).replace(/<\//g, '<\\/');
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Polyfill &amp; Transform Analysis Report — ${escapeHtmlStr(report.targetUrl)}</title>
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('vitepress-theme-appearance') || localStorage.getItem('e18e-theme-appearance');
+        var isDark = saved ? saved === 'dark' : true;
+        document.documentElement.classList.toggle('dark', isDark);
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
-      --bg-dark: #0f172a;
-      --bg-card: #1e293b;
-      --bg-card-hover: #334155;
-      --border: rgba(148, 163, 184, 0.16);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --accent: #a855f7;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #22c55e;
-      --info: #3b82f6;
+      --vp-c-white: #ffffff;
+      --vp-c-black: #000000;
+      --vp-c-neutral: var(--vp-c-black);
+      --vp-c-neutral-inverse: var(--vp-c-white);
+
+      --vp-c-bg: #ffffff;
+      --vp-c-bg-alt: #f6f6f7;
+      --vp-c-bg-elv: #ffffff;
+      --vp-c-bg-soft: #f6f6f7;
+
+      --vp-c-border: #c2c2c4;
+      --vp-c-divider: #e2e2e3;
+      --vp-c-gutter: #e2e2e3;
+
+      --vp-c-text-1: #3c3c43;
+      --vp-c-text-2: #67676c;
+      --vp-c-text-3: #929295;
+
+      --vp-c-brand-1: #c37822;
+      --vp-c-brand-2: #cc7d24;
+      --vp-c-brand-3: #cf8c3c;
+      --vp-c-brand-soft: rgba(207, 140, 60, 0.14);
+
+      --vp-c-green-1: #18794e;
+      --vp-c-green-2: #299764;
+      --vp-c-green-3: #30a46c;
+      --vp-c-green-soft: rgba(16, 185, 129, 0.14);
+
+      --vp-c-yellow-1: #915930;
+      --vp-c-yellow-2: #946300;
+      --vp-c-yellow-3: #9f6a00;
+      --vp-c-yellow-soft: rgba(234, 179, 8, 0.14);
+
+      --vp-c-red-1: #b8272c;
+      --vp-c-red-2: #d5393e;
+      --vp-c-red-3: #e0575b;
+      --vp-c-red-soft: rgba(244, 63, 94, 0.14);
+
+      --vp-c-purple-1: #6f42c1;
+      --vp-c-purple-soft: rgba(159, 122, 234, 0.14);
+
+      --vp-home-hero-name-background: linear-gradient(120deg, #7cb560, #cf8c3c);
+      --vp-input-border-color: var(--vp-c-border);
+      --vp-input-switch-bg-color: rgba(142, 150, 170, 0.16);
+      --vp-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --vp-shadow-2: 0 3px 12px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.07);
+      --vp-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --vp-font-family-mono: ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
     }
+
+    html.dark {
+      color-scheme: dark;
+      --vp-c-neutral: var(--vp-c-white);
+      --vp-c-neutral-inverse: var(--vp-c-black);
+
+      --vp-c-bg: #1b1b1f;
+      --vp-c-bg-alt: #161618;
+      --vp-c-bg-elv: #202127;
+      --vp-c-bg-soft: #202127;
+
+      --vp-c-border: #3c3f44;
+      --vp-c-divider: #2e2e32;
+      --vp-c-gutter: #000000;
+
+      --vp-c-text-1: #dfdfd6;
+      --vp-c-text-2: #98989f;
+      --vp-c-text-3: #6a6a71;
+
+      --vp-c-brand-1: #cf8c3c;
+      --vp-c-brand-2: #cc7d24;
+      --vp-c-brand-3: #c37822;
+      --vp-c-brand-soft: rgba(207, 140, 60, 0.16);
+
+      --vp-c-green-1: #3dd68c;
+      --vp-c-green-2: #30a46c;
+      --vp-c-green-3: #298459;
+      --vp-c-green-soft: rgba(16, 185, 129, 0.16);
+
+      --vp-c-yellow-1: #f9b44e;
+      --vp-c-yellow-2: #da8b17;
+      --vp-c-yellow-3: #a46a0a;
+      --vp-c-yellow-soft: rgba(234, 179, 8, 0.16);
+
+      --vp-c-red-1: #f66f81;
+      --vp-c-red-2: #f14158;
+      --vp-c-red-3: #b62a3c;
+      --vp-c-red-soft: rgba(244, 63, 94, 0.16);
+
+      --vp-c-purple-1: #c8abfa;
+      --vp-c-purple-soft: rgba(159, 122, 234, 0.16);
+
+      --vp-input-switch-bg-color: rgba(101, 117, 133, 0.16);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg-dark) 45%);
-      color: var(--text-main);
+      font-family: var(--vp-font-family-base);
+      background-color: var(--vp-c-bg);
+      color: var(--vp-c-text-1);
       min-height: 100vh;
-      line-height: 1.55;
+      line-height: 1.6;
+      transition: background-color 0.25s, color 0.25s;
     }
     header {
-      border-bottom: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(12px);
-      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--vp-c-divider);
+      background-color: var(--vp-c-bg);
+      padding: 0 2rem;
+      min-height: 4rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1266,91 +1357,192 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
       position: sticky;
       top: 0;
       z-index: 50;
+      transition: background-color 0.25s, border-color 0.25s;
     }
-    .brand { display: flex; align-items: center; gap: 0.85rem; }
+    .brand { display: flex; align-items: center; gap: 0.85rem; padding: 0.65rem 0; }
     .brand-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #7cb560, #cf8c3c);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; font-weight: 800; color: #fff;
-      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.45);
+      font-size: 1.25rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 14px rgba(207, 140, 60, 0.3);
     }
-    .brand h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
-    .brand p { font-size: 0.8rem; color: var(--text-muted); }
-    main { max-width: 1440px; margin: 0 auto; padding: 2rem; }
-    .btn {
-      background: linear-gradient(135deg, #0284c7, #6366f1);
-      color: #fff; border: none; border-radius: 10px;
-      padding: 0.65rem 1.15rem; font-weight: 600; font-size: 0.85rem;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem;
+    .brand h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: var(--vp-home-hero-name-background);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    .btn-secondary {
-      background: rgba(51, 65, 85, 0.7);
-      border: 1px solid var(--border);
-    }
-    .pill-btn {
-      background: rgba(51, 65, 85, 0.55);
-      border: 1px solid var(--border);
-      color: #cbd5e1;
-      padding: 0.35rem 0.8rem;
-      border-radius: 999px;
+    .brand p { font-size: 0.8rem; color: var(--vp-c-text-2); }
+    .brand code {
+      font-family: var(--vp-font-family-mono);
+      background: var(--vp-c-brand-soft);
+      color: var(--vp-c-brand-1);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
       font-size: 0.78rem;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .nav-divider {
+      width: 1px;
+      height: 24px;
+      background-color: var(--vp-c-divider);
+      margin: 0 0.25rem;
+    }
+
+    /* Authentic e18e.dev / VitePress Dark/Light Toggle Switch */
+    .VPSwitch {
+      border: 1px solid var(--vp-input-border-color);
+      background-color: var(--vp-input-switch-bg-color);
+      border-radius: 11px;
+      flex-shrink: 0;
+      width: 40px;
+      height: 22px;
+      transition: border-color 0.25s, background-color 0.25s;
+      display: inline-block;
+      position: relative;
       cursor: pointer;
     }
-    .pill-btn:hover, .pill-btn.active {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: var(--primary);
+    .VPSwitch:hover { border-color: var(--vp-c-brand-1); }
+    .VPSwitch .check {
+      background-color: var(--vp-c-neutral-inverse);
+      width: 18px;
+      height: 18px;
+      box-shadow: var(--vp-shadow-1);
+      border-radius: 50%;
+      transition: transform 0.25s, background-color 0.25s;
+      position: absolute;
+      top: 1px;
+      left: 1px;
+    }
+    .VPSwitch .icon {
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .VPSwitch .icon svg {
+      width: 12px;
+      height: 12px;
+      color: var(--vp-c-text-2);
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: opacity 0.25s;
+    }
+    html.dark .VPSwitch .icon svg { color: var(--vp-c-text-1); }
+    .VPSwitch .sun { opacity: 1; }
+    .VPSwitch .moon { opacity: 0; }
+    html.dark .VPSwitch .sun { opacity: 0; }
+    html.dark .VPSwitch .moon { opacity: 1; }
+    html.dark .VPSwitchAppearance .check { transform: translateX(18px); }
+
+    main { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .btn {
+      background-color: var(--vp-c-brand-3);
       color: #fff;
+      border: 1px solid transparent;
+      border-radius: 20px;
+      padding: 0.5rem 1.1rem;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+    }
+    .btn:hover { background-color: var(--vp-c-brand-2); }
+    .btn-secondary {
+      background-color: var(--vp-c-bg-soft);
+      color: var(--vp-c-text-1);
+      border: 1px solid var(--vp-c-divider);
+    }
+    .btn-secondary:hover {
+      border-color: var(--vp-c-brand-1);
+      background-color: var(--vp-c-bg-elv);
+    }
+    .pill-btn {
+      background-color: var(--vp-c-bg-soft);
+      border: 1px solid var(--vp-c-divider);
+      color: var(--vp-c-text-2);
+      padding: 0.38rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn:hover, .pill-btn.active {
+      background-color: var(--vp-c-brand-soft);
+      border-color: var(--vp-c-brand-1);
+      color: var(--vp-c-brand-1);
     }
     .section-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
     }
-    .section-header h2 { font-size: 1.25rem; font-weight: 700; }
+    .section-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--vp-c-text-1); }
     .recommendations-list {
       display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.25rem;
     }
     .rec-card {
-      background: rgba(30, 41, 59, 0.85);
-      border-radius: 14px;
+      background-color: var(--vp-c-bg-soft);
+      border-radius: 12px;
       padding: 1.35rem 1.5rem;
-      border: 1px solid var(--border);
-      border-left: 5px solid var(--info);
+      border: 1px solid var(--vp-c-divider);
+      border-left: 4px solid var(--vp-c-brand-1);
+      transition: border-color 0.25s, background-color 0.25s;
     }
-    .rec-card.CRITICAL { border-left-color: var(--danger); background: linear-gradient(90deg, rgba(239,68,68,0.09) 0%, rgba(30,41,59,0.85) 35%); }
-    .rec-card.HIGH { border-left-color: var(--warning); background: linear-gradient(90deg, rgba(245,158,11,0.09) 0%, rgba(30,41,59,0.85) 35%); }
-    .rec-card.INFO { border-left-color: var(--primary); }
+    .rec-card.CRITICAL { border-left-color: var(--vp-c-red-1); }
+    .rec-card.HIGH { border-left-color: var(--vp-c-yellow-1); }
+    .rec-card.INFO { border-left-color: var(--vp-c-brand-1); }
     .rec-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.55rem; flex-wrap: wrap; }
     .badge {
-      font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.55rem;
-      border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+      font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem;
+      border-radius: 6px; text-transform: uppercase; letter-spacing: 0.04em;
+      display: inline-block;
     }
-    .badge-CRITICAL { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .badge-HIGH { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .badge-INFO { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
-    .badge-high-status { background: rgba(34, 197, 94, 0.18); color: #86efac; }
-    .badge-low-status { background: rgba(245, 158, 11, 0.18); color: #fde047; }
-    .badge-false-status { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
-    .rec-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
-    .rec-desc { color: #cbd5e1; font-size: 0.92rem; margin-bottom: 0.75rem; }
+    .badge-CRITICAL { background-color: var(--vp-c-red-soft); color: var(--vp-c-red-1); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .badge-HIGH { background-color: var(--vp-c-yellow-soft); color: var(--vp-c-yellow-1); border: 1px solid rgba(234, 179, 8, 0.3); }
+    .badge-INFO { background-color: var(--vp-c-brand-soft); color: var(--vp-c-brand-1); border: 1px solid rgba(207, 140, 60, 0.3); }
+    .badge-high-status { background-color: var(--vp-c-green-soft); color: var(--vp-c-green-1); }
+    .badge-low-status { background-color: var(--vp-c-yellow-soft); color: var(--vp-c-yellow-1); }
+    .badge-false-status { background-color: var(--vp-c-red-soft); color: var(--vp-c-red-1); }
+    .rec-title { font-size: 1.04rem; font-weight: 700; color: var(--vp-c-text-1); }
+    .rec-desc { color: var(--vp-c-text-2); font-size: 0.92rem; margin-bottom: 0.75rem; }
     .rec-action {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background-color: var(--vp-c-bg-alt);
+      border: 1px solid var(--vp-c-divider);
       border-radius: 8px;
       padding: 0.7rem 1rem;
       font-size: 0.88rem;
-      color: #e0f2fe;
+      color: var(--vp-c-text-1);
       margin-bottom: 0.65rem;
     }
     .chip-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
     .chip {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-family: var(--vp-font-family-mono);
       font-size: 0.74rem;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border);
-      padding: 0.18rem 0.5rem;
-      border-radius: 5px;
-      color: #93c5fd;
+      background-color: var(--vp-c-bg-alt);
+      border: 1px solid var(--vp-c-divider);
+      padding: 0.18rem 0.55rem;
+      border-radius: 6px;
+      color: var(--vp-c-brand-1);
+    }
+    .chip-bundle {
+      color: var(--vp-c-purple-1);
+      background-color: var(--vp-c-purple-soft);
+      border-color: rgba(159, 122, 234, 0.28);
     }
     .kpi-grid {
       display: grid;
@@ -1359,56 +1551,59 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
       margin-bottom: 2.25rem;
     }
     .kpi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      background-color: var(--vp-c-bg-soft);
+      border: 1px solid var(--vp-c-divider);
+      border-radius: 12px;
       padding: 1.2rem 1.35rem;
+      transition: border-color 0.25s, background-color 0.25s;
     }
-    .kpi-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-    .kpi-value { font-size: 1.85rem; font-weight: 800; margin-top: 0.25rem; color: #fff; }
-    .kpi-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .kpi-card:hover { border-color: var(--vp-c-brand-1); }
+    .kpi-label { font-size: 0.76rem; font-weight: 600; color: var(--vp-c-text-2); text-transform: uppercase; letter-spacing: 0.04em; }
+    .kpi-value { font-size: 1.85rem; font-weight: 800; margin-top: 0.25rem; color: var(--vp-c-text-1); }
+    .kpi-sub { font-size: 0.8rem; color: var(--vp-c-text-2); margin-top: 0.25rem; }
     .bundle-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      background-color: var(--vp-c-bg-soft);
+      border: 1px solid var(--vp-c-divider);
+      border-radius: 12px;
       margin-bottom: 1.25rem;
       overflow: hidden;
+      transition: border-color 0.25s, background-color 0.25s;
     }
     .bundle-header {
       padding: 1rem 1.35rem;
-      background: rgba(15, 23, 42, 0.5);
-      border-bottom: 1px solid var(--border);
+      background-color: var(--vp-c-bg-alt);
+      border-bottom: 1px solid var(--vp-c-divider);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 0.75rem;
     }
-    .bundle-title { font-family: monospace; font-size: 0.95rem; font-weight: 700; color: #38bdf8; }
-    .bundle-meta { display: flex; gap: 0.85rem; align-items: center; font-size: 0.82rem; color: var(--text-muted); flex-wrap: wrap; }
+    .bundle-title { font-family: var(--vp-font-family-mono); font-size: 0.95rem; font-weight: 700; color: var(--vp-c-brand-1); }
+    .bundle-meta { display: flex; gap: 0.85rem; align-items: center; font-size: 0.82rem; color: var(--vp-c-text-2); flex-wrap: wrap; }
     table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th, td {
       text-align: left;
       padding: 0.75rem 1.2rem;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--vp-c-divider);
       vertical-align: top;
     }
     th {
       font-size: 0.74rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--text-muted);
-      background: rgba(15, 23, 42, 0.35);
+      color: var(--vp-c-text-2);
+      background-color: var(--vp-c-bg-alt);
     }
     code.code-snippet {
       display: block;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-family: var(--vp-font-family-mono);
       font-size: 0.78rem;
-      background: #090d16;
+      background-color: var(--vp-c-bg-alt);
       padding: 0.45rem 0.65rem;
       border-radius: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      color: #e2e8f0;
+      border: 1px solid var(--vp-c-divider);
+      color: var(--vp-c-text-1);
       overflow-x: auto;
       max-width: 560px;
       white-space: pre-wrap;
@@ -1426,20 +1621,29 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
         <p>Target: <code>${escapeHtmlStr(report.targetUrl)}</code> &bull; Scanned at ${escapeHtmlStr(report.scannedAt)}</p>
       </div>
     </div>
-    <div style="display: flex; gap: 0.6rem;">
+    <div class="header-actions">
       <button class="btn btn-secondary" onclick="downloadMarkdownReport()">⬇️ Export Markdown</button>
       <button class="btn btn-secondary" onclick="downloadJsonReport()">⬇️ Export JSON</button>
+      <div class="nav-divider"></div>
+      <button class="VPSwitch VPSwitchAppearance" type="button" role="switch" title="Switch between dark and light theme" aria-label="Switch between dark and light theme" onclick="toggleTheme()">
+        <span class="check">
+          <span class="icon">
+            <svg class="sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg class="moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </span>
+        </span>
+      </button>
     </div>
   </header>
 
   <main>
     ${
       bt
-        ? `<div class="bundle-card" style="padding: 1rem 1.35rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent);">
-            <div style="font-size: 0.9rem; font-weight: 700; color: #fff;">🎯 Configured Baseline Target: ${escapeHtmlStr(bt.targetLabel)}</div>
+        ? `<div class="bundle-card" style="padding: 1rem 1.35rem; margin-bottom: 1.5rem; border-left: 4px solid var(--vp-c-brand-1);">
+            <div style="font-size: 0.92rem; font-weight: 700; color: var(--vp-c-text-1);">🎯 Configured Baseline Target: ${escapeHtmlStr(bt.targetLabel)}</div>
             ${
               coreBrowsers
-                ? `<div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">Compatible Core Browsers (via <code>baseline-browser-mapping</code>): <code>${escapeHtmlStr(coreBrowsers)}</code></div>`
+                ? `<div style="font-size: 0.82rem; color: var(--vp-c-text-2); margin-top: 0.25rem;">Compatible Core Browsers (via <code>baseline-browser-mapping</code>): <code>${escapeHtmlStr(coreBrowsers)}</code></div>`
                 : ''
             }
           </div>`
@@ -1456,7 +1660,7 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
     <div id="kpi-grid" class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Bundles Scanned</div>
-        <div class="kpi-value">${s.totalBundlesScanned} <span style="font-size:1rem; color:var(--text-muted)">/ ${s.totalScriptsDiscovered}</span></div>
+        <div class="kpi-value">${s.totalBundlesScanned} <span style="font-size:1rem; color:var(--vp-c-text-2)">/ ${s.totalScriptsDiscovered}</span></div>
         <div class="kpi-sub">${(s.totalBytesScanned / 1024).toFixed(1)} KB total JS analyzed</div>
       </div>
       <div class="kpi-card">
@@ -1466,17 +1670,17 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Redundant (${escapeHtmlStr(targetShortName)})</div>
-        <div class="kpi-value" style="color: ${s.redundantPercentage > 50 ? '#fca5a5' : '#86efac'}">${s.redundantPercentage}%</div>
+        <div class="kpi-value" style="color: ${s.redundantPercentage > 50 ? 'var(--vp-c-red-1)' : 'var(--vp-c-green-1)'}">${s.redundantPercentage}%</div>
         <div class="kpi-sub">${s.redundantPolyfillCount} of ${s.totalPolyfillInstances} natively in ${escapeHtmlStr(targetShortName)}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Estimated Size Savings</div>
-        <div class="kpi-value" style="color: #38bdf8">-${((s.estimatedTotalSavingsBytes || 0) / 1024).toFixed(1)} KB</div>
+        <div class="kpi-value" style="color: var(--vp-c-brand-1)">-${((s.estimatedTotalSavingsBytes || 0) / 1024).toFixed(1)} KB</div>
         <div class="kpi-sub">${((s.polyfillsBundleTotalBytes || 0) / 1024).toFixed(1)} KB &rarr; ~${((s.estimatedPostRemovalPolyfillBundleBytes || 0) / 1024).toFixed(1)} KB (-${s.estimatedPolyfillBundleSavingsPercentage || 0}%)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Duplicate Polyfills</div>
-        <div class="kpi-value" style="color: ${s.duplicateFeatureCount > 0 ? '#fcd34d' : '#86efac'}">${s.duplicateFeatureCount}</div>
+        <div class="kpi-value" style="color: ${s.duplicateFeatureCount > 0 ? 'var(--vp-c-yellow-1)' : 'var(--vp-c-green-1)'}">${s.duplicateFeatureCount}</div>
         <div class="kpi-sub">Shipped in multiple chunks</div>
       </div>
       <div class="kpi-card">
@@ -1525,6 +1729,14 @@ export function formatWebsiteHtmlReport(report: WebsiteScanReport): string {
   <script>
     const currentReport = ${safeJson};
     const currentMarkdown = ${safeMarkdown};
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      try {
+        localStorage.setItem('vitepress-theme-appearance', isDark ? 'dark' : 'light');
+        localStorage.setItem('e18e-theme-appearance', isDark ? 'dark' : 'light');
+      } catch (e) {}
+    }
 
     function filterBundles(mode) {
       document.querySelectorAll('.filter-bar .pill-btn').forEach(btn => btn.classList.remove('active'));
