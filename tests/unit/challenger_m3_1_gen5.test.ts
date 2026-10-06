@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadCatalog, getRuleById, clearCatalogCache, registerCacheClearCallback } from '../../src/catalog/index.js';
+import { loadCatalog, getRuleById, clearCatalogCache, registerCacheClearCallback } from 'polyfill-patterns';
 import { scan, scanFile, ruleQueryCache, clearRuleCache } from '../../src/engine/index.js';
 
 describe('Challenger M3 R1 Gen5 - Cache Invalidation & False Positive Stress Test', () => {

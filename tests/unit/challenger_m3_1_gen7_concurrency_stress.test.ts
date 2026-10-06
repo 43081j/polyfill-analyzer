@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { RollupAdapter, EsbuildAdapter } from '../../src/bundlers/index.js';
-import { loadCatalog, getRuleById, clearCatalogCache, registerCacheClearCallback, unregisterCacheClearCallback } from '../../src/catalog/index.js';
+import { loadCatalog, getRuleById, clearCatalogCache, registerCacheClearCallback, unregisterCacheClearCallback } from 'polyfill-patterns';
 import { scan, ruleQueryCache, clearRuleCache } from '../../src/engine/index.js';
 
 describe('Challenger M3 R1 Gen7 - Empirical Concurrency & Resilience Stress Tests', () => {

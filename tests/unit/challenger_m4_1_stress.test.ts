@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { runCli } from '../../src/cli/index.js';
 import { scanFile, ruleQueryCache, clearRuleCache } from '../../src/engine/index.js';
-import { clearCatalogCache } from '../../src/catalog/index.js';
+import { clearCatalogCache } from 'polyfill-patterns';
 
 describe('Challenger M4 R1 - Bundle Analysis Demo CLI Stress Test', () => {
   let exitSpy: any;

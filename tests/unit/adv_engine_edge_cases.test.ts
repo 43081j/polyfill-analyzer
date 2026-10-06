@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { scan, scanFile, parseYamlRule, formatTableReport, clearRuleCache } from '../../src/engine/index.js';
-import { clearCatalogCache, RuleEntry } from '../../src/catalog/index.js';
+import { clearCatalogCache, type RuleEntry } from 'polyfill-patterns';
 
 describe('Adversarial Test Suite: R2 Engine & Inference Edge Cases (Phase 4)', () => {
   let tmpDir: string;

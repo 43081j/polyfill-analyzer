@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { RuleEntrySchema } from '../../src/catalog/index.js';
+import { RuleEntrySchema } from 'polyfill-patterns';
 
 describe('RuleSchema Bundlers Attribution Validation', () => {
   const validBaseRule = {
