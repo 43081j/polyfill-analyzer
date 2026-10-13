@@ -1,13 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse, Lang } from '@ast-grep/napi';
-import YAML from 'yaml';
-import { loadCatalog, RuleEntry, registerCacheClearCallback } from '../catalog/index.js';
-export type { RuleEntry } from '../catalog/index.js';
+import {
+  loadCatalog,
+  type RuleEntry,
+  registerCacheClearCallback,
+  parseYamlRule,
+  resolveRuleYamlPath,
+  FEATURE_CALL_PATTERNS,
+  ruleQueryCache,
+} from 'polyfill-patterns';
+export type { RuleEntry } from 'polyfill-patterns';
+export { parseYamlRule, ruleQueryCache } from 'polyfill-patterns';
 export * from './inference.js';
 export * from './website-scanner.js';
-
-export const ruleQueryCache = new Map<string, any>();
 
 export function clearRuleCache(): void {
   ruleQueryCache.clear();
@@ -17,15 +23,6 @@ registerCacheClearCallback(() => {
   clearRuleCache();
 });
 
-export function parseYamlRule(content: string): { rule: any } {
-  const doc = YAML.parse(content);
-  if (!doc) {
-    throw new Error('Invalid YAML syntax or empty pattern list in rule definition');
-  }
-  const rule = doc.rule !== undefined ? doc.rule : doc;
-  return { rule };
-}
-
 import { SourceMapConsumer, OneToOneMapping } from './sourcemap.js';
 export { SourceMapConsumer } from './sourcemap.js';
 export type { OneToOneMapping, SourceLocationMapping } from './sourcemap.js';
@@ -33,27 +30,6 @@ export type { OneToOneMapping, SourceLocationMapping } from './sourcemap.js';
 export interface RuleEntryWithMapping extends RuleEntry {
   mapping?: OneToOneMapping;
 }
-
-const FEATURE_CALL_PATTERNS: Record<string, { method?: string; syntaxRegex?: RegExp }> = {
-  'array-at': { method: 'at', syntaxRegex: /\.at\s*\(/ },
-  'array-includes': { method: 'includes', syntaxRegex: /\.includes\s*\(/ },
-  'array-filter': { method: 'filter', syntaxRegex: /\.filter\s*\(/ },
-  'array-find-last': { method: 'findLast', syntaxRegex: /\.findLast\s*\(/ },
-  'array-flat': { method: 'flat', syntaxRegex: /\.flat(?:Map)?\s*\(/ },
-  'object-has-own': { method: 'hasOwn', syntaxRegex: /Object\.hasOwn\s*\(/ },
-  'object-assign': { method: 'assign', syntaxRegex: /Object\.assign\s*\(/ },
-  'object-entries': { method: 'entries', syntaxRegex: /Object\.entries\s*\(/ },
-  'object-values': { method: 'values', syntaxRegex: /Object\.values\s*\(/ },
-  'object-from-entries': { method: 'fromEntries', syntaxRegex: /Object\.fromEntries\s*\(/ },
-  'promise-all-settled': { method: 'allSettled', syntaxRegex: /Promise\.allSettled\s*\(/ },
-  'promise-any': { method: 'any', syntaxRegex: /Promise\.any\s*\(/ },
-  'string-replace-all': { method: 'replaceAll', syntaxRegex: /\.replaceAll\s*\(/ },
-  'class-fields': { syntaxRegex: /#\w+|^\s*(?:static\s+)?\w+\s*=\s*[^;]+;/ },
-  'async-iteration': { syntaxRegex: /for\s+await\s*\(|async\s+function/ },
-  'async-generator': { syntaxRegex: /async\s*\*\s*\w+|async\s+function\s*\*/ },
-  'nullish-coalescing': { syntaxRegex: /\?\?/ },
-  'optional-chaining': { syntaxRegex: /\?\./ },
-};
 
 function buildOneToOneMapping(
   entry: RuleEntry,
@@ -192,7 +168,7 @@ export function scan(code: string, catalogPath?: string, sm?: SourceMapConsumer 
     try {
       let query = ruleQueryCache.get(entry.astGrepRulePath);
       if (!query) {
-        const rulePath = path.resolve(process.cwd(), entry.astGrepRulePath);
+        const rulePath = resolveRuleYamlPath(entry);
         if (!fs.existsSync(rulePath)) {
           continue;
         }

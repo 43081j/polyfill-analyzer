@@ -2,21 +2,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { getDefaultCatalogPath, getRulesDir, resolveRuleYamlPath } from 'polyfill-patterns';
 import { describe, test, assert } from './runner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, '../../');
-const srcRoot = path.join(workspaceRoot, 'src');
-const catalogPath = path.join(srcRoot, 'catalog/rules.json');
+const catalogPath = getDefaultCatalogPath();
 const distBundlesRoot = path.join(workspaceRoot, 'dist/bundles');
 
 describe('Tier 1 - F3: AST-grep Rule Catalog Linking & Schema Verification', () => {
-  test('F3-T1-1: Catalog definition file (src/catalog/rules.json) exists or rules directory is present', () => {
-    const rulesDir = path.join(srcRoot, 'catalog');
-    assert.skipIfMissing(rulesDir, `Catalog directory missing: ${rulesDir}`);
-    const catalogExists = fs.existsSync(catalogPath) || fs.existsSync(path.join(rulesDir, 'index.ts'));
-    assert.ok(catalogExists, 'Catalog rules definition file or directory must exist');
+  test('F3-T1-1: Catalog definition file (polyfill-patterns/rules.json) exists and rules directory is present', () => {
+    const rulesDir = getRulesDir();
+    assert.skipIfMissing(rulesDir, `Catalog rules directory missing: ${rulesDir}`);
+    const catalogExists = fs.existsSync(catalogPath);
+    assert.ok(catalogExists, 'Catalog rules definition file must exist');
   });
 
   test('F3-T1-2: Catalog contains >= 10 distinct ECMAScript feature rules', () => {
@@ -60,7 +60,7 @@ describe('Tier 1 - F3: AST-grep Rule Catalog Linking & Schema Verification', () 
     assert.skipIfMissing(catalogPath, `Catalog JSON missing: ${catalogPath}`);
     const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
     for (const rule of catalog.rules) {
-      const rulePath = path.resolve(workspaceRoot, rule.astGrepRulePath);
+      const rulePath = resolveRuleYamlPath(rule);
       assert.existsSync(rulePath, `Referenced AST-grep rule YAML must exist: ${rulePath}`);
     }
   });
@@ -219,7 +219,7 @@ describe('Tier 2 - F3: Boundary & Corner Cases for Rule Catalog', () => {
     assert.skipIfMissing(catalogPath, `Catalog JSON missing: ${catalogPath}`);
     const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
     for (const rule of catalog.rules || []) {
-      const rulePath = path.resolve(workspaceRoot, rule.astGrepRulePath);
+      const rulePath = resolveRuleYamlPath(rule);
       assert.ok(fs.existsSync(rulePath), `Rule id ${rule.id} points to non-existent astGrepRulePath: ${rulePath}`);
     }
   });

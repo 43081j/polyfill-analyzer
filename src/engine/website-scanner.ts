@@ -10,7 +10,7 @@ import {
   generateRecommendations,
   evaluateBaselineTarget,
 } from './index.js';
-import { getEstimatedPolyfillBytes } from '../catalog/index.js';
+import { getEstimatedPolyfillBytes } from 'polyfill-patterns';
 import type {
   RuleEntryWithMapping,
   BaselineTargetOptions,

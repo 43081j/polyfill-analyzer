@@ -13,7 +13,7 @@ import {
   formatWebsiteHtmlReport,
   WebsiteScanReport,
 } from '../engine/index.js';
-import { loadCatalog } from '../catalog/index.js';
+import { loadCatalog } from 'polyfill-patterns';
 
 const UI_HTML = `<!DOCTYPE html>
 <html lang="en" class="dark">

@@ -2,13 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { getDefaultCatalogPath } from 'polyfill-patterns';
 import { describe, test, assert } from './runner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, '../../');
 const distBundlesRoot = path.join(workspaceRoot, 'dist/bundles');
-const catalogPath = path.join(workspaceRoot, 'src/catalog/rules.json');
+const catalogPath = getDefaultCatalogPath();
 
 describe('Tier 3 - Cross-Feature Pairwise Combinations (R1 Bundler Pipeline x R2 Catalog & AST Rules)', () => {
   const pairwiseCases = [

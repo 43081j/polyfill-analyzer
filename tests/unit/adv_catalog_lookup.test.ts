@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getRuleByWebFeatureId, getRuleByBcdId, getAllRules, loadCatalog, clearCatalogCache, resolveDynamicBaseline } from '../../src/catalog/index.js';
+import { getRuleByWebFeatureId, getRuleByBcdId, getAllRules, loadCatalog, clearCatalogCache, resolveDynamicBaseline, getDefaultCatalogPath } from 'polyfill-patterns';
 import path from 'node:path';
 
 describe('Adversarial Test Suite: R2 Catalog Lookup API Coverage Gaps (Phase 4)', () => {
@@ -30,7 +30,7 @@ describe('Adversarial Test Suite: R2 Catalog Lookup API Coverage Gaps (Phase 4)'
     const allRules = getAllRules();
     expect(allRules.length).toBeGreaterThanOrEqual(15);
 
-    const relPath = 'src/catalog/rules.json';
+    const relPath = getDefaultCatalogPath();
     const relRules = getAllRules(relPath);
     expect(relRules.length).toBe(allRules.length);
     expect(relRules).toEqual(allRules);

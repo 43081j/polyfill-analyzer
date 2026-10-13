@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { RuleEntrySchema, loadCatalog, clearCatalogCache } from '../../src/catalog/index.js';
+import { RuleEntrySchema, loadCatalog, clearCatalogCache } from 'polyfill-patterns';
 import { generateRecommendations, formatTableReport } from '../../src/engine/index.js';
 import fs from 'node:fs';
 import path from 'node:path';

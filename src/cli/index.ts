@@ -15,7 +15,7 @@ import {
   analyzeBundles,
   evaluateBaselineTarget,
 } from '../engine/index.js';
-import { loadCatalog } from '../catalog/index.js';
+import { loadCatalog, resolveRuleYamlPath } from 'polyfill-patterns';
 import { startWebServer } from '../web/server.js';
 
 export const version = '0.1.0';
@@ -181,7 +181,7 @@ export function runCli(argv = process.argv.slice(2)): void {
           process.exit(1);
         }
         for (const r of cat.rules) {
-          const rPath = path.resolve(process.cwd(), r.astGrepRulePath);
+          const rPath = resolveRuleYamlPath(r);
           if (fs.existsSync(rPath)) {
             const content = fs.readFileSync(rPath, 'utf8');
             parseYamlRule(content);

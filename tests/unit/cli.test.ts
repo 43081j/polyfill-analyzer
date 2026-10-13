@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { runCli } from '../../src/cli/index.js';
 import { clearRuleCache } from '../../src/engine/index.js';
-import { clearCatalogCache } from '../../src/catalog/index.js';
+import { clearCatalogCache } from 'polyfill-patterns';
 
 describe('CLI Unit Tests', () => {
   let exitSpy: any;

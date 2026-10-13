@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { clearCatalogCache, registerCacheClearCallback, unregisterCacheClearCallback } from '../../src/catalog/index.js';
+import { clearCatalogCache, registerCacheClearCallback, unregisterCacheClearCallback } from 'polyfill-patterns';
 
 describe('Challenger Stress Test M3 R6: Cache Callback Deduplication & Exception Resilience', () => {
   let originalConsoleError: typeof console.error;

@@ -9,7 +9,7 @@ import {
   clearRuleCache,
   RuleEntry
 } from '../../src/engine/index.js';
-import { clearCatalogCache } from '../../src/catalog/index.js';
+import { clearCatalogCache } from 'polyfill-patterns';
 
 describe('Inference Engine Unit Tests', () => {
   beforeEach(() => {

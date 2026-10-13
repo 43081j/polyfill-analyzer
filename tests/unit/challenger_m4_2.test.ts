@@ -8,7 +8,7 @@ import {
   generateRecommendations,
   clearRuleCache
 } from '../../src/engine/index.js';
-import { clearCatalogCache } from '../../src/catalog/index.js';
+import { clearCatalogCache } from 'polyfill-patterns';
 
 describe('Challenger M4 R3: Baseline Inference and Modernization Recommendations Stress Test', () => {
   beforeEach(() => {

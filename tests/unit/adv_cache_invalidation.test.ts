@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { registerCacheClearCallback, clearCatalogCache } from '../../src/catalog/index.js';
+import { registerCacheClearCallback, clearCatalogCache } from 'polyfill-patterns';
 import { scan, ruleQueryCache, clearRuleCache } from '../../src/engine/index.js';
 
 describe('Adversarial Cache Invalidation - Non-throwing tests', () => {

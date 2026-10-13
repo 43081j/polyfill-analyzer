@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { getCompatibleVersions } from 'baseline-browser-mapping';
-import { RuleEntry } from '../catalog/index.js';
+import { type RuleEntry } from 'polyfill-patterns';
 
 export interface BaselineTargetOptions {
   /**

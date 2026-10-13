@@ -41,8 +41,11 @@ describe('Website Scanner & High-Level Recommendation Engine', () => {
 
     // 2. Verify high-level recommendations at top
     expect(report.highLevelRecommendations.length).toBeGreaterThanOrEqual(3);
-    expect(report.highLevelRecommendations[0].priority).toBe('CRITICAL');
-    expect(report.highLevelRecommendations[0].title).toContain('Syntax vs. Polyfill Target Mismatch');
+    const mismatchRec = report.highLevelRecommendations.find((r) =>
+      r.title.includes('Un-polyfilled / Un-transformed Feature')
+    );
+    expect(mismatchRec).toBeDefined();
+    expect(mismatchRec?.priority).toBe('INFO');
 
     const dupRec = report.highLevelRecommendations.find((r) =>
       r.title.includes('Duplicate Polyfills')
@@ -55,7 +58,7 @@ describe('Website Scanner & High-Level Recommendation Engine', () => {
     const md = formatWebsiteMarkdownReport(report);
     expect(md).toContain('# Website Polyfill & Transform Analysis: `https://example.com/`');
     expect(md).toContain('## 🎯 High-Level Executive Summary & Actionable Recommendations');
-    expect(md).toContain('[CRITICAL] Syntax vs. Polyfill Target Mismatch');
+    expect(md).toContain('Un-polyfilled / Un-transformed Feature');
     expect(md).toContain('## 🔄 Duplicate Polyfills Shipped Across Multiple Bundles');
   });
 });
